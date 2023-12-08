@@ -1,7 +1,7 @@
 import pygame
 from sys import exit
 from utils import load_image, load_images
-from menu import *
+from menu import main_menu, choose_player_set_menu, choose_player_menu, credits_menu, minigame_menu, game_play, button_animation
 from player import Player
 from car import Car
 
@@ -47,7 +47,7 @@ class Game:
         
         #Game control variable
         self.game_running = True
-        self.game_state = 1 
+        self.game_state = 1
         self.main_menu_state = 1
         self.size_state = 0
         self.credits_state = 0
@@ -74,6 +74,7 @@ class Game:
         self.car3 = Car(self,self.player.player_set,3,self.player.player_status,100, self.height * 0.75)
         self.car4 = Car(self,self.player.player_set,4,self.player.player_status,100, self.height * 0.85)
         self.car5 = Car(self,self.player.player_set,5,self.player.player_status,100, self.height * 0.94)
+        self.cars = [self.car1, self.car2, self.car3, self.car4, self.car5]
         
     def run(self):
         while self.game_running:

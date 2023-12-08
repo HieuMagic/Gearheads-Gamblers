@@ -21,11 +21,8 @@ class Player(pygame.sprite.Sprite):
         self.game.display.blit(self.image, self.rect)
         
     def update_pos(self):
-        self.player1.pos = (self.width * 0.2, self.height / 2)
-        self.player2.pos = (self.width * 0.35, self.height / 2)
-        self.player3.pos = (self.width * 0.5, self.height / 2)
-        self.player4.pos = (self.width * 0.65, self.height / 2)
-        self.player5.pos = (self.width * 0.8, self.height / 2)
-        self.player.pos = (self.width * 0.5, self.height / 2)
+        positions = [self.width * 0.2, self.width * 0.35, self.width * 0.5, self.width * 0.65, self.width * 0.8]
+        for i, player in enumerate([self.player1, self.player2, self.player3, self.player4, self.player5]):
+            player.pos = (positions[i], self.height / 2)
 
             

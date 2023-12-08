@@ -41,29 +41,20 @@ class Car(pygame.sprite.Sprite):
     def update(self):
         self.movement()
         update_assets(self, self.game.assets)
-        self.image = pygame.transform.scale(self.game.assets['cars'][int(self.index % len(self.game.assets['cars']))], (100, 50))
+        self.image = pygame.transform.scale(self.game.assets['cars'][int(self.index % len(self.game.assets['cars']))], (120, 50))
         self.game.display.blit(pygame.transform.scale(self.image, (100,50)), self.rect)
     
     def update_pos(self, game):
-        self.game = game
-        if self.game.map_size == 'SMALL':
-            self.car1.y_pos = (self.game.height * 0.55)
-            self.car2.y_pos = (self.game.height * 0.65)
-            self.car3.y_pos = (self.game.height * 0.75)
-            self.car4.y_pos = (self.game.height * 0.85)
-            self.car5.y_pos = (self.game.height * 0.94)
-        elif self.game.map_size == 'MEDIUM':
-            self.car1.y_pos = (self.game.height * 0.5)
-            self.car2.y_pos = (self.game.height * 0.6)
-            self.car3.y_pos = (self.game.height * 0.7)
-            self.car4.y_pos = (self.game.height * 0.8)
-            self.car5.y_pos = (self.game.height * 0.9)
-        elif self.game.map_size == 'LARGE':
-            self.car1.y_pos = (self.game.height * 0.55)
-            self.car2.y_pos = (self.game.height * 0.65)
-            self.car3.y_pos = (self.game.height * 0.75)
-            self.car4.y_pos = (self.game.height * 0.85)
-            self.car5.y_pos = (self.game.height * 0.94)
+            self.game = game
+            height_ratio = {
+                'SMALL': [0.52, 0.62, 0.72, 0.82, 0.9],
+                'MEDIUM': [0.47, 0.56, 0.69, 0.8, 0.9],
+                'LARGE': [0.32, 0.45, 0.6, 0.74, 0.88]
+            }
+            ratios = height_ratio.get(self.game.map_size)
+            if ratios:
+                for i, car in enumerate([self.car1, self.car2, self.car3, self.car4, self.car5]):
+                    car.rect.y = self.game.height * ratios[i]
         
 
         

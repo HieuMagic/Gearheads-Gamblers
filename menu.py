@@ -1,7 +1,6 @@
 import pygame
 from button import Button, AnimatedButton
 from utils import get_text_size, get_image_size, update_assets, count_child_folders
-from car import Car
 
 # Menu
 def main_menu(self, game):
@@ -128,62 +127,50 @@ def minigame_menu(self, game):
             self.main_menu_state = 1
 
 def choose_player_set_menu(self):
-    #Background
+    # Background
     button_animation(self)
     self.display.blit(pygame.transform.scale(self.assets['background'], (self.width, self.height)), (0,0))
     self.text_surf = self.LightPixel_font.render(self.choose_player_set_text, False, self.base_color)
-    self.text_rect = self.text_surf.get_rect(center = (self.width / 2, self.height * 0.1))
+    self.text_rect = self.text_surf.get_rect(center=(self.width / 2, self.height * 0.1))
     self.display.blit(self.text_surf, self.text_rect)
-    
-    self.NEXT_BUTTON = Button(image = None, pos = (self.width * 0.9, self.height * 0.9), text_input = "NEXT>",
-                              font = self.LightPixel_font, base_color = self.base_color, hovering_color = self.hovering_color)
-    self.PREV_BUTTON = Button(image = None, pos = (self.width * 0.1, self.height * 0.9), text_input = "<PREV",
-                              font = self.LightPixel_font, base_color = self.base_color, hovering_color = self.hovering_color)
-    self.CONFIRM_BUTTON = Button(image = None, pos = (self.width * 0.5, self.height * 0.9), text_input = self.confirm_text,
-                               font = self.LightPixel_font, base_color = self.base_color, hovering_color = self.hovering_color)
-    self.BACK_BUTTON = Button(image = None, pos = (self.width * 0.05, self.height * 0.05), text_input = "<BACK>",
-                              font = self.LightPixel_font, base_color = self.base_color, hovering_color = self.hovering_color)
-    for button in [self.NEXT_BUTTON, self.PREV_BUTTON, self.CONFIRM_BUTTON, self.BACK_BUTTON]:
+
+    self.NEXT_BUTTON = Button(image=None, pos=(self.width * 0.9, self.height * 0.9), text_input="NEXT>",
+                              font=self.LightPixel_font, base_color=self.base_color, hovering_color=self.hovering_color)
+    self.PREV_BUTTON = Button(image=None, pos=(self.width * 0.1, self.height * 0.9), text_input="<PREV",
+                              font=self.LightPixel_font, base_color=self.base_color, hovering_color=self.hovering_color)
+    self.CONFIRM_BUTTON = Button(image=None, pos=(self.width * 0.5, self.height * 0.9), text_input=self.confirm_text,
+                                 font=self.LightPixel_font, base_color=self.base_color, hovering_color=self.hovering_color)
+    self.BACK_BUTTON = Button(image=None, pos=(self.width * 0.05, self.height * 0.05), text_input="<BACK>",
+                              font=self.LightPixel_font, base_color=self.base_color, hovering_color=self.hovering_color)
+    buttons = [self.NEXT_BUTTON, self.PREV_BUTTON, self.CONFIRM_BUTTON, self.BACK_BUTTON]
+    for button in buttons:
         button.changeColor(self.mouse_pos)
         button.update(self.display)
-    
+
     if self.BACK_BUTTON.checkForInput(self.mouse_pos) and pygame.mouse.get_pressed()[0] == 1:
         self.game_state = 2
 
-    if self.NEXT_BUTTON.checkForInput(self.mouse_pos):
-        if pygame.mouse.get_pressed()[0] == 1:
-            self.button_pressed = True
-        elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
-            self.player_set += 1
-            if self.player_set == 6:
-                self.player_set = 1
-            self.button_pressed = False
-    
-    if self.PREV_BUTTON.checkForInput(self.mouse_pos):
-        if pygame.mouse.get_pressed()[0] == 1:
-            self.button_pressed = True
-        elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
-            self.player_set -= 1
-            if self.player_set == 0:
-                self.player_set = 5
-            self.button_pressed = False
+    if self.NEXT_BUTTON.checkForInput(self.mouse_pos) and pygame.mouse.get_pressed()[0] == 1:
+        self.button_pressed = True
+    elif self.NEXT_BUTTON.checkForInput(self.mouse_pos) and pygame.mouse.get_pressed()[0] == 0 and self.button_pressed:
+        self.player_set = (self.player_set % 5) + 1
+        self.button_pressed = False
 
-    # if self.CONFIRM_BUTTON.checkForInput(self.mouse_pos) and pygame.mouse.get_pressed()[0] == 1:
-    #     self.game_state = 4
-    
+    if self.PREV_BUTTON.checkForInput(self.mouse_pos) and pygame.mouse.get_pressed()[0] == 1:
+        self.button_pressed = True
+    elif self.PREV_BUTTON.checkForInput(self.mouse_pos) and pygame.mouse.get_pressed()[0] == 0 and self.button_pressed:
+        self.player_set = (self.player_set - 2) % 5 + 1
+        self.button_pressed = False
+
     for player in [self.player1, self.player2, self.player3, self.player4, self.player5]:
         player.player_set = self.player_set
         player.update()
-    
-    self.temp = 0
-    
-    if self.CONFIRM_BUTTON.checkForInput(self.mouse_pos):
-        if pygame.mouse.get_pressed()[0] == 1:
-            self.button_pressed = True
-        elif pygame.mouse.get_pressed()[0] == 0:
-            if self.button_pressed == True:
-                self.game_state = 4
-                self.button_pressed = False 
+
+    if self.CONFIRM_BUTTON.checkForInput(self.mouse_pos) and pygame.mouse.get_pressed()[0] == 1:
+        self.button_pressed = True
+    elif self.CONFIRM_BUTTON.checkForInput(self.mouse_pos) and pygame.mouse.get_pressed()[0] == 0 and self.button_pressed:
+        self.game_state = 4
+        self.button_pressed = False
             
 def choose_player_menu(self):
     #Background
@@ -249,21 +236,15 @@ def game_play(self):
     self.display.fill("#3A9BDC")
     self.display.blit(pygame.transform.scale(pygame.image.load(f'data/map/{self.map_index}/{self.map_size}.png'), (self.width, self.height)), (0,0))
     #Display the cars
-    self.car1.player_set = self.player1.player_set
-    self.car1.player_index = self.player1.player_index
-    self.car1.update()
-    self.car2.player_set = self.player2.player_set
-    self.car2.player_index = self.player2.player_index
-    self.car2.update()
-    self.car3.player_set = self.player3.player_set
-    self.car3.player_index = self.player3.player_index
-    self.car3.update()
-    self.car4.player_set = self.player4.player_set
-    self.car4.player_index = self.player4.player_index
-    self.car4.update()
-    self.car5.player_set = self.player5.player_set
-    self.car5.player_index = self.player5.player_index
-    self.car5.update()
+    for car, player in zip(self.cars, [self.player1, self.player2, self.player3, self.player4, self.player5]):
+        car.player_set = player.player_set
+        car.player_index = player.player_index
+        car.update()
+
+    if all(car.rect.x > self.width * 0.9 for car in self.cars):
+        for car in self.cars:
+            car.rect.x = 100
+        self.game_state = 2    
     
 #Button    
 def button_load(self):
