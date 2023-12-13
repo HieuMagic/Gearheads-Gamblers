@@ -1,7 +1,7 @@
 import pygame
 from sys import exit
 from utils import load_image, load_images
-from menu import main_menu, choose_player_set_menu, choose_player_menu, credits_menu, minigame_menu, game_play, button_animation
+from menu import main_menu, choose_player_set_menu, choose_player_menu, credits_menu, minigame_menu, game_play, button_animation, leaderboard
 from player import Player
 from car import Car
 
@@ -19,6 +19,7 @@ class Game:
         #Clock, font... 
         self.clock = pygame.time.Clock()
         self.LightPixel_font = pygame.font.Font('data/font/LightPixel.ttf', 30)
+        self.SmallerLightPixel_font = pygame.font.Font('data/font/LightPixel.ttf', 20)
         self.SoftnBig_font = pygame.font.Font('data/font/Pixeltype.ttf', 50)
         self.Arcade_font = pygame.font.Font('data/font/Arcade.ttf', 50)
         self.DIRECTION_font = pygame.font.Font('data/font/LightPixel.ttf', 100)
@@ -31,23 +32,30 @@ class Game:
         self.player_set = 1
         self.player_index = 1
         self.player_status = 1
+        
         #---#
-        self.map_index = 1    
-        self.map_size = "SMALL"  
+        self.map_index = 1
+        self.map_size = "SMALL"
         
         #Assets
         self.assets = {
             'loadgame' : load_image('data/graphics/interface/BACKGROUND_2.png'),
-            'background' : load_image('data/graphics/background/Background4.png'),
+            'background' : load_image('data/graphics/background/background.png'),
             'players' : load_images(f'data/player/{self.player_set}/{self.player_index}/{self.player_status}/'),
             'map_preview' : load_images("data/map/preview"),
             'map' : load_image(f'data/map/{self.map_index}/{self.map_size}.png'),
             'cars' : load_images(f'data/graphics/car/{self.player_set}/{self.player_index}'),
+            'buffs' : load_images('data/magic')
         }
+        
+        #Image
+        self.button_image = pygame.image.load('data/small.png')
+        self.dialogue_image = pygame.image.load('data/dialogue.png')
+        self.long_button_image = pygame.image.load('data/long.png')
         
         #Game control variable
         self.game_running = True
-        self.game_state = 1
+        self.game_state = 2
         self.main_menu_state = 1
         self.size_state = 0
         self.credits_state = 0
@@ -57,6 +65,8 @@ class Game:
         self.map_state = 0
         self.button_pressed = False
         self.text_state = 0
+        self.finish_line_x = self.width * 0.9
+        self.rank = 0
 
         #Player 
         # (Set, Type, Status) #
@@ -65,8 +75,8 @@ class Game:
         self.player3 = Player(self,self.player_set,3,self.player_status,(self.width * 0.5, self.height / 2))
         self.player4 = Player(self,self.player_set,4,self.player_status,(self.width * 0.65, self.height / 2))
         self.player5 = Player(self,self.player_set,5,self.player_status,(self.width * 0.8, self.height / 2))
-        self.player = Player(self,self.player_set,3,self.player_status,(self.width * 0.5, self.height / 2))
-            
+        self.player = Player(self,self.player_set,3,self.player_status,(self.width / 2, self.height / 2))
+
         #Car
         # (Set, Type, Status) #
         self.car1 = Car(self,self.player.player_set,1,self.player.player_status,100, self.height * 0.55)
@@ -117,7 +127,7 @@ class Game:
                 Player.update_pos(self)
                 choose_player_set_menu(self)
                 
-            #State 4
+            #State
             elif self.game_state == 4:
                 choose_player_menu(self)
                 
@@ -125,6 +135,10 @@ class Game:
             elif self.game_state == 5:
                 Car.update_pos(self, self)
                 game_play(self)
+                
+            #State 6
+            elif self.game_state == 6:
+                leaderboard(self)
                 
             #Scale n update
             self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0,0))        

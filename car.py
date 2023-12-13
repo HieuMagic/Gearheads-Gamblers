@@ -1,6 +1,6 @@
 import pygame
 from utils import update_assets
-from random import randint, uniform
+from random import uniform
 
 class Car(pygame.sprite.Sprite):
     def __init__(self,game,set,type,status, x_pos, y_pos):
@@ -9,13 +9,17 @@ class Car(pygame.sprite.Sprite):
         self.player_index = type
         self.player_status = status
         self.player_set = set
-        self.acceleration = 0.2
-        self.max_speed = 8
-        self.speed = 1
+        self.acceleration = 0.5
+        self.max_speed = 10
+        self.speed = 2
         self.pos = (x_pos, y_pos)
         self.index = 0
+        self.reached_finish_line = False
+        self.rank = None
+        self.triggered = False
         self.image = pygame.transform.scale(self.game.assets['cars'][int(self.index % len(self.game.assets['cars']))], (100, 50))
         self.rect = self.image.get_rect(center = self.pos)
+
         
     def movement(self):
         #Generate random speed
@@ -32,7 +36,7 @@ class Car(pygame.sprite.Sprite):
         self.speed = min(abs(self.speed), self.max_speed)
          
         #Check if the car reached the finish line
-        if self.rect.x > self.game.width * 0.9:
+        if self.rect.x > self.game.finish_line_x:
             self.speed = 0
             
         #Update the position
@@ -41,6 +45,10 @@ class Car(pygame.sprite.Sprite):
     def update(self):
         self.movement()
         update_assets(self, self.game.assets)
+        if self.rect.x > self.game.finish_line_x and self.triggered == False:
+            self.reached_finish_line = True
+            self.triggered = True
+        self.index += 0.25
         self.image = pygame.transform.scale(self.game.assets['cars'][int(self.index % len(self.game.assets['cars']))], (120, 50))
         self.game.display.blit(pygame.transform.scale(self.image, (100,50)), self.rect)
     
@@ -51,6 +59,13 @@ class Car(pygame.sprite.Sprite):
                 'MEDIUM': [0.47, 0.56, 0.69, 0.8, 0.9],
                 'LARGE': [0.32, 0.45, 0.6, 0.74, 0.88]
             }
+            if self.game.map_size == 'SMALL':
+                self.game.finish_line_x = self.game.width * 0.9
+            elif self.game.map_size == 'MEDIUM':
+                self.game.finish_line_x = self.game.width * 0.9
+            elif self.game.map_size == 'LARGE':
+                self.game.finish_line_x = self.game.width * 0.94 
+                
             ratios = height_ratio.get(self.game.map_size)
             if ratios:
                 for i, car in enumerate([self.car1, self.car2, self.car3, self.car4, self.car5]):

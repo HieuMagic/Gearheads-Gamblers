@@ -9,10 +9,15 @@ class Button:
 		self.base_color, self.hovering_color = base_color, hovering_color
 		self.text_input = text_input
 		self.text = self.font.render(self.text_input, True, self.base_color)
-		if self.image is None:
+		if image is None:
 			self.image = self.text
+		else:
+			self.rect = self.image.get_rect(center=(self.x_pos, self.y_pos))
+			self.text_rect = self.text.get_rect(center=(self.x_pos, self.y_pos))
+			self.image = pygame.transform.scale(image, (self.text_rect.width + 50, self.text_rect.height + 30))
 		self.rect = self.image.get_rect(center=(self.x_pos, self.y_pos))
 		self.text_rect = self.text.get_rect(center=(self.x_pos, self.y_pos))
+		
 
 	def update(self, screen):
 		if self.image is not None:
@@ -29,7 +34,36 @@ class Button:
 			self.text = self.font.render(self.text_input, True, self.hovering_color)
 		else:
 			self.text = self.font.render(self.text_input, True, self.base_color)
-   
+
+class CustomButton:
+	def __init__(self, game, text, img1, img2, pos):
+		#Core attributes
+		self.game = game
+		self.original_y_pos = pos[1]
+	
+		#Unclicked image
+		self.img1 = img1
+		self.img1_rect = self.img1.get_rect(center = pos)
+
+		#Clicked image
+		self.img2 = img2
+		self.img2_rect = self.img2.get_rect(center = pos)
+
+		#Text
+		self.text = self.game.LightPixel_font.render(text, True, '#FFFFFF')
+		self.text_rect = self.text.get_rect(center = pos)
+				
+	def draw(self):
+		mouse_pos = pygame.mouse.get_pos()
+		self.game.display.blit(self.img1, self.img1_rect)
+		if self.img1_rect.collidepoint(mouse_pos):
+			if pygame.mouse.get_pressed()[0]:
+				self.game.display.blit(self.img2, self.img2_rect)
+				self.game.display.blit(self.text, self.text_rect)
+			else:
+				self.game.display.blit(self.img1, self.img1_rect)
+				self.game.display.blit(self.text, self.text_rect)
+
 class AnimatedButton:
 	pressed = False
 	def __init__(self,game,text,width,height,pos,elevation):
