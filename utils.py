@@ -39,5 +39,4 @@ def count_images_in_folder(folder_path):
         if os.path.isfile(os.path.join(folder_path, file_name)):
             if any(file_name.lower().endswith(ext) for ext in image_extensions):
                 image_count += 1
-
     return image_count

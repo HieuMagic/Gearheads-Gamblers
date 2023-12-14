@@ -2,6 +2,7 @@ import pygame
 from button import Button, AnimatedButton, CustomButton
 from utils import get_text_size, get_image_size, update_assets, count_child_folders
 from car import Car
+
 # Menu
 def main_menu(self, game):
     #Background
@@ -23,7 +24,7 @@ def main_menu(self, game):
 
     self.left_button = CustomButton(self, None, pygame.image.load('data/button/left_button_1.png'), pygame.image.load('data/button/left_button_2.png'), (self.width * 0.7, self.height * 0.525))
     self.left_button.draw()
-    
+
     #Choose map and load button
     button_load(self)
     if self.RIGHTBUTTON.checkForInput(self.mouse_pos):
@@ -32,6 +33,7 @@ def main_menu(self, game):
         choose_map_left(self)
     if self.MAP_SIZE.checkForInput(self.mouse_pos):
         choose_map_size(self, self.game)
+        
     map_load(self)
     check_button_pressed(self)
      
@@ -99,12 +101,12 @@ def minigame_menu(self, game):
     self.display.blit(pygame.transform.scale(self.assets['background'], (self.width, self.height)), (0,0))
 
     #Text
-    self.limit_text = self.LightPixel_font.render("! LIMIT FOR MINIGAME: 100 !", False, self.base_color)
+    self.limit_text = self.BiggerLightPixel_font.render("! LIMIT FOR MINIGAME: 100 !", False, self.base_color)
     self.limit_text_rect = self.limit_text.get_rect(center = (self.width / 2, self.height * 0.1))
     
     #Variable
     self.mouse_pos = pygame.mouse.get_pos()
-    self.base_color = "BLACK"
+    self.base_color = "WHITE"
     self.hovering_color = "#e2446c"
     
     #Create button
@@ -146,6 +148,7 @@ def choose_player_set_menu(self):
     self.text_rect = self.text_surf.get_rect(center=(self.width / 2, self.height * 0.1))
     self.display.blit(self.text_surf, self.text_rect)
 
+    # Button
     self.NEXT_BUTTON = Button(image=None, pos=(self.width * 0.9, self.height * 0.9), text_input="NEXT>",
                               font=self.LightPixel_font, base_color=self.base_color, hovering_color=self.hovering_color)
     self.PREV_BUTTON = Button(image=None, pos=(self.width * 0.1, self.height * 0.9), text_input="<PREV",
@@ -160,7 +163,10 @@ def choose_player_set_menu(self):
         button.update(self.display)
 
     if self.BACK_BUTTON.checkForInput(self.mouse_pos) and pygame.mouse.get_pressed()[0] == 1:
+        self.button_pressed = True
+    elif self.BACK_BUTTON.checkForInput(self.mouse_pos) and pygame.mouse.get_pressed()[0] == 0 and self.button_pressed:
         self.game_state = 2
+        self.button_pressed = False
 
     if self.NEXT_BUTTON.checkForInput(self.mouse_pos) and pygame.mouse.get_pressed()[0] == 1:
         self.button_pressed = True
@@ -173,16 +179,18 @@ def choose_player_set_menu(self):
     elif self.PREV_BUTTON.checkForInput(self.mouse_pos) and pygame.mouse.get_pressed()[0] == 0 and self.button_pressed:
         self.player_set = (self.player_set - 2) % 5 + 1
         self.button_pressed = False
-
-    for player in [self.player1, self.player2, self.player3, self.player4, self.player5]:
-        player.player_set = self.player_set
-        player.update()
-
+    
     if self.CONFIRM_BUTTON.checkForInput(self.mouse_pos) and pygame.mouse.get_pressed()[0] == 1:
         self.button_pressed = True
     elif self.CONFIRM_BUTTON.checkForInput(self.mouse_pos) and pygame.mouse.get_pressed()[0] == 0 and self.button_pressed:
         self.game_state = 4
         self.button_pressed = False
+        
+    #Display the player
+    for player in self.player_group:
+        player.player_set = self.player_set
+        player.update()
+
             
 def choose_player_menu(self):
     #Background
@@ -250,14 +258,15 @@ def game_play(self):
     #Display the map
     self.display.fill("#3A9BDC")
     self.display.blit(pygame.transform.scale(pygame.image.load(f'data/map/{self.map_index}/{self.map_size}.png'), (self.width, self.height)), (0,0))
+    
     #Display the cars
-    for car, player in zip(self.cars, [self.player1, self.player2, self.player3, self.player4, self.player5]):
+    for car, player in zip(self.car_group.sprites(), self.player_group.sprites()):
         car.player_set = player.player_set
         car.player_index = player.player_index
         car.update()
     
     #Check if car reached the finish line, if yes, update the rank
-    for car in self.cars:
+    for car in self.car_group.sprites():
         if car.rect.x >= self.finish_line_x and car.reached_finish_line:
             self.rank += 1
             car.rank = self.rank
@@ -266,13 +275,13 @@ def game_play(self):
     #If all cars reached the finish line, display the next button
     self.NEXT_BUTTON = Button(image = None, pos = (self.width * 0.9, self.height * 0.2), text_input = "NEXT>",
                               font = self.LightPixel_font, base_color = "WHITE", hovering_color = self.hovering_color)
-    if all([car.rank for car in self.cars]): 
+    if all([car.rank for car in self.car_group.sprites()]): 
         for button in [self.NEXT_BUTTON]:
             button.changeColor(self.mouse_pos)
             button.update(self.display)
     
     #Show the rank of each car
-    for car in self.cars:
+    for car in self.car_group.sprites():
         if car.rank:
             self.rank_text = self.SmallerLightPixel_font.render(f"Rank {car.rank}", False, "RED")
             self.rank_text_rect = self.rank_text.get_rect(center = (car.rect.x - 100, car.rect.y + 30))

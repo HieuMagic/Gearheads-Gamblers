@@ -9,9 +9,9 @@ class Car(pygame.sprite.Sprite):
         self.player_index = type
         self.player_status = status
         self.player_set = set
-        self.acceleration = 0.5
-        self.max_speed = 10
-        self.speed = 2
+        self.acceleration = 0.2
+        self.max_speed = 50
+        self.speed = 10
         self.pos = (x_pos, y_pos)
         self.index = 0
         self.reached_finish_line = False
@@ -43,7 +43,8 @@ class Car(pygame.sprite.Sprite):
         self.rect.x += abs(self.speed)
             
     def update(self):
-        self.movement()
+        if self.game.race_started:
+            self.movement()
         update_assets(self, self.game.assets)
         if self.rect.x > self.game.finish_line_x and self.triggered == False:
             self.reached_finish_line = True
@@ -68,7 +69,7 @@ class Car(pygame.sprite.Sprite):
                 
             ratios = height_ratio.get(self.game.map_size)
             if ratios:
-                for i, car in enumerate([self.car1, self.car2, self.car3, self.car4, self.car5]):
+                for i, car in enumerate(self.game.car_group.sprites()):
                     car.rect.y = self.game.height * ratios[i]
         
 
