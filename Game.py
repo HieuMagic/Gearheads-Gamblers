@@ -5,7 +5,6 @@ from menu import main_menu, choose_player_set_menu, choose_player_menu, credits_
 from player import Player
 from car import Car
 from buff import Buff
-import time
 
 class Game:     
     def __init__(self):
@@ -31,7 +30,8 @@ class Game:
         
         #User's variable
         self.player_name = "ChuHieuMagic"
-        self.money = 90        
+        self.money = 999      
+        self.bet = 200
         
         #Game variable
         self.player_set = 1
@@ -82,7 +82,7 @@ class Game:
         self.player3 = self.player_group.add(Player(self,self.player_set,3,self.player_status,(self.width * 0.5, self.height / 2)))
         self.player4 = self.player_group.add(Player(self,self.player_set,4,self.player_status,(self.width * 0.65, self.height / 2)))
         self.player5 = self.player_group.add(Player(self,self.player_set,5,self.player_status,(self.width * 0.8, self.height / 2)))
-        self.player = self.player_group.sprites()[0]
+        self.player =  Player(self,self.player_set,self.player_index,self.player_status,(self.width * 0.3, self.height / 2))
         
         #Car
         # (Set, Type, Status) #
@@ -92,12 +92,18 @@ class Game:
         self.car3 = self.car_group.add(Car(self,self.player_set,3,self.player_status,100, self.height * 0.75))
         self.car4 = self.car_group.add(Car(self,self.player_set,4,self.player_status,100, self.height * 0.85))
         self.car5 = self.car_group.add(Car(self,self.player_set,5,self.player_status,100, self.height * 0.94))
+        self.car = Car(self,self.player_set,self.player_index,self.player_status,self.width * 0.6, self.height / 2)
 
         #Timer
         self.buff_group = pygame.sprite.Group()
         self.buff_timer = pygame.USEREVENT + 1
         pygame.time.set_timer(self.buff_timer, 2000)
+        self.start_time = 0
         
+    def current(self):
+        self.current_time = pygame.time.get_ticks() - self.start_time
+        return self.current_time
+            
     def run(self):
         while self.game_running:
             #Update variable
@@ -130,21 +136,30 @@ class Game:
                 Player.update_pos(self)
                 choose_player_set_menu(self)
                 
-            #State
+            #State 4
             elif self.game_state == 4:
                 choose_player_menu(self)
+                self.start_time = pygame.time.get_ticks()
                 
             #State 5
             elif self.game_state == 5:
                 Car.update_pos(self, self)
                 game_play(self)
+                
                 for event in pygame.event.get():
                     if event.type == self.buff_timer and self.race_started:
                         self.buff_group.add(Buff(self))
                 self.buff_group.update()
-                self.start_time = int(pygame.time.get_ticks() / 1000)
-                print(self.start_time)
-                if self.start_time >= 3:
+                
+                if self.current() < 3000:
+                    self.count_down_text = self.BiggerLightPixel_font.render(str(3 - int(self.current() / 1000)), 0, (111, 196, 169))
+                    self.count_down_rect = self.count_down_text.get_rect(center = (self.display.get_width() / 2, self.display.get_height() / 2))
+                    self.display.blit(self.count_down_text, self.count_down_rect)
+                elif self.current() >= 3000 and self.current() < 4000:
+                    self.count_down_text = self.BiggerLightPixel_font.render("GO!", 0, (111, 196, 169))
+                    self.count_down_rect = self.count_down_text.get_rect(center = (self.display.get_width() / 2, self.display.get_height() / 2))
+                    self.display.blit(self.count_down_text, self.count_down_rect)
+                if self.current() >= 3000:
                     self.game.race_started = True
                     
             #State 6
@@ -158,6 +173,7 @@ class Game:
             else:
                 self.display.blit(self.cursor_point, (self.mouse_pos[0] - 10, self.mouse_pos[1] - 10))
             
+            #Event handling
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -171,4 +187,5 @@ class Game:
             self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0,0))        
             pygame.display.update()           
             self.clock.tick(60)
+            
 Game().run()

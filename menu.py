@@ -14,26 +14,34 @@ def main_menu(self, game):
     self.base_color = "WHITE"
     self.hovering_color = "#e2446c"
 
+    #Choose map and load button
+    button_load(self)
+    if self.MAP_SIZE.checkForInput(self.mouse_pos):
+        if pygame.mouse.get_pressed()[0] == 1:
+            self.button_pressed = True
+        elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
+            if self.game.map_size == "SMALL":
+                self.game.map_size = "MEDIUM"
+            elif self.game.map_size == "MEDIUM":
+                self.game.map_size = "LARGE"
+            elif self.game.map_size == "LARGE":
+                self.game.map_size = "SMALL"
+            self.map_size = self.game.map_size
+            self.button_pressed = False
+        
     #Game name
     self.game_name = self.Arcade_font.render("Gearheads&Gamblers", False, self.base_color)
     self.game_name_rect = self.game_name.get_rect(center = (self.width / 2, self.height * 0.1))
     self.display.blit(self.game_name, self.game_name_rect)
 
-    self.right_button = CustomButton(self, None, pygame.image.load('data/button/right_button_1.png'), pygame.image.load('data/button/right_button_2.png'), (self.width * 0.3, self.height * 0.525))
-    self.right_button.draw()
+    self.right_button = CustomButton(self, None, pygame.image.load('data/button/right_button_1.png'), pygame.image.load('data/button/right_button_2.png'),
+                                     (self.width * 0.3, self.height * 0.525), 'choose_map_right')
+    self.right_button.update()
 
-    self.left_button = CustomButton(self, None, pygame.image.load('data/button/left_button_1.png'), pygame.image.load('data/button/left_button_2.png'), (self.width * 0.7, self.height * 0.525))
-    self.left_button.draw()
+    self.left_button = CustomButton(self, None, pygame.image.load('data/button/left_button_1.png'), pygame.image.load('data/button/left_button_2.png'),
+                                    (self.width * 0.7, self.height * 0.525), 'choose_map_left')
+    self.left_button.update()
 
-    #Choose map and load button
-    button_load(self)
-    if self.RIGHTBUTTON.checkForInput(self.mouse_pos):
-        choose_map_right(self)
-    if self.LEFTBUTTON.checkForInput(self.mouse_pos):
-        choose_map_left(self)
-    if self.MAP_SIZE.checkForInput(self.mouse_pos):
-        choose_map_size(self, self.game)
-        
     map_load(self)
     check_button_pressed(self)
      
@@ -185,13 +193,25 @@ def choose_player_set_menu(self):
     elif self.CONFIRM_BUTTON.checkForInput(self.mouse_pos) and pygame.mouse.get_pressed()[0] == 0 and self.button_pressed:
         self.game_state = 4
         self.button_pressed = False
-        
+    
+    #Show and ajust the bet money
+    self.bet_money_text = self.LightPixel_font.render(f"BET MONEY: {self.bet}", False, self.base_color)
+    self.bet_money_text_rect = self.bet_money_text.get_rect(center = (self.width / 2, self.height * 0.8))
+    self.display.blit(self.bet_money_text, self.bet_money_text_rect)
+    
+    #Bet button
+    self.bet_money_up_button = CustomButton(self, None, pygame.image.load('data/button/plus_1.png'), pygame.image.load('data/button/plus_0.png'),
+                                            (self.width * 0.65, self.height * 0.8), 'bet_plus')
+    self.bet_money_down_button = CustomButton(self, None, pygame.image.load('data/button/minus_1.png'), pygame.image.load('data/button/minus_0.png'),
+                                              (self.width * 0.35, self.height * 0.8), 'bet_minus')
+    self.bet_money_up_button.update()
+    self.bet_money_down_button.update()
+    
     #Display the player
     for player in self.player_group:
         player.player_set = self.player_set
         player.update()
-
-            
+ 
 def choose_player_menu(self):
     #Background
     button_animation(self)
@@ -246,11 +266,18 @@ def choose_player_menu(self):
             if self.button_pressed == True:
                 self.game_state = 5
                 self.button_pressed = False
-    
-    self.player.pos = (self.width / 2, self.height / 2)
+
+    #Display the player
+    self.player.pos = (self.width * 0.4, self.height / 2)
     self.player.player_set = self.player_set    
     self.player.player_index = self.player_index
     self.player.update()
+    
+    #Display the player's car
+    self.car.pos = (self.width * 0.6, self.height / 2)
+    self.car.player_set = self.player_set
+    self.car.player_index = self.player_index
+    self.car.update()
 
 #Main game
 def game_play(self):
@@ -294,7 +321,7 @@ def game_play(self):
         elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
             self.game_state = 6 # Change to leaderboard
             self.button_pressed = False
-
+    
 def leaderboard(self):
     #Background
     self.display.blit(pygame.transform.scale(self.assets['background'], (self.width, self.height)), (0,0))
@@ -341,9 +368,13 @@ def button_load(self):
 
 def check_button_pressed(self):
     #Check if start button is pressed
-    if self.START.checkForInput(self.mouse_pos) and pygame.mouse.get_pressed()[0] == 1:
+    if self.START.checkForInput(self.mouse_pos):
         if pygame.mouse.get_pressed()[0] == 1:
-            self.game_state = 3
+            self.button_pressed = True
+        elif pygame.mouse.get_pressed()[0] == 0:
+            if self.button_pressed == True:
+                self.game_state = 3
+                self.button_pressed = False
 
     #Change screen size
     if self.SIZE.checkForInput(self.mouse_pos):
@@ -382,7 +413,6 @@ def check_button_pressed(self):
             pygame.quit()
             exit()
     
-    
 #Animation
 def button_animation(self):
     self.select_map_texts = [" >SELECT THIS MAP< ", "> SELECT THIS MAP <"]
@@ -401,44 +431,7 @@ def map_load(self):
     self.map_surface = self.assets['map_preview'][int(self.map_state) % len(self.assets['map_preview'])]
     self.map_rect = self.map_surface.get_rect(center = (self.width / 2, self.height * 0.525))
     self.display.blit(pygame.transform.rotozoom(self.map_surface, 0, 1), self.map_rect)  
-
-def choose_map_right(self):
-    if pygame.mouse.get_pressed()[0] == 1:
-        self.button_pressed = True
-    elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
-            self.map_state += 1
-            self.map_index += 1
-            if self.map_state == len(self.assets['map_preview']):
-                self.map_index = 1
-                self.map_state = 0
-            self.button_pressed = False
-
-def choose_map_left (self):
-    if pygame.mouse.get_pressed()[0] == 1:
-        self.button_pressed = True
-    elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
-            self.map_state -= 1
-            self.map_index -= 1
-            if self.map_state == 0:
-                self.map_state = len(self.assets['map_preview'])
-            if self.map_index == 0:
-                self.map_index = 5
-            self.button_pressed = False
-
-def choose_map_size(self, game):
-    self.game = game
-    if pygame.mouse.get_pressed()[0] == 1:
-        self.button_pressed = True
-    elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
-        if self.game.map_size == "SMALL":
-            self.game.map_size = "MEDIUM"
-        elif self.game.map_size == "MEDIUM":
-            self.game.map_size = "LARGE"
-        elif self.game.map_size == "LARGE":
-            self.game.map_size = "SMALL"
-        self.map_size = self.game.map_size
-        self.button_pressed = False
-        
+      
 #Choose Player Set    
 def player_load(self):
     update_assets(self, self.assets)

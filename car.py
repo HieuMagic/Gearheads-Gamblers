@@ -10,8 +10,8 @@ class Car(pygame.sprite.Sprite):
         self.player_status = status
         self.player_set = set
         self.acceleration = 0.2
-        self.max_speed = 50
-        self.speed = 10
+        self.max_speed = 7
+        self.speed = 1
         self.pos = (x_pos, y_pos)
         self.index = 0
         self.reached_finish_line = False
@@ -38,6 +38,7 @@ class Car(pygame.sprite.Sprite):
         #Check if the car reached the finish line
         if self.rect.x > self.game.finish_line_x:
             self.speed = 0
+            self.rect.x = self.game.finish_line_x
             
         #Update the position
         self.rect.x += abs(self.speed)

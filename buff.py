@@ -23,37 +23,34 @@ class Buff(pygame.sprite.Sprite):
             self.image = (pygame.image.load('data/magic/teleport.png'))
             
         #randomly choose a car and create a buff 200 pixel to the right of the car
-        cars_not_reached_finish = [car for car in self.game.car_group.sprites() if not car.triggered]
-        if cars_not_reached_finish != []:
-            self.chosen_car = choice(cars_not_reached_finish)
-            self.pos = (self.chosen_car.rect.x + 200, self.chosen_car.rect.y + 20)
-            self.rect = self.image.get_rect(center = self.pos)
-        else:
-            self.chosen_car = None
+        cars = [car for car in self.game.car_group.sprites()]
+        
+        self.chosen_car = choice(cars)
+        self.pos = (self.chosen_car.rect.x + 200, self.chosen_car.rect.y + 20)
+        self.rect = self.image.get_rect(center = self.pos)
 
-    
     def update(self):
         if self.chosen_car != None:
             self.game.display.blit(self.image, self.rect)
         #check if the buff is picked up
-            if pygame.sprite.spritecollide(self, self.game.car_group, False):
+            if pygame.sprite.spritecollide(self, self.game.car_group, False) or self.rect.x < self.chosen_car.rect.x:
                 self.apply_buff()
                 self.kill()
 
     def apply_buff(self):
         if self.type == 'speed_up':
-            self.chosen_car.speed += 20
+            self.chosen_car.speed += 10
         elif self.type == 'return':
             self.chosen_car.rect.x = 100
         elif self.type == 'stop':
             if self.stop_duration:
-                self.chosen_car.speed = -1
+                self.chosen_car.speed = 0
                 self.stop_duration -= 100
         elif self.type == 'win':
-            self.chosen_car.rect.x = self.game.finish_line_x * 0.95
+            self.chosen_car.rect.x = self.game.finish_line_x * 0.98
         elif self.type == 'sleep':
             if self.stop_duration:
-                self.chosen_car.speed = -1
+                self.chosen_car.speed = 0
                 self.stop_duration -= 100
             self.chosen_car.rect.x -= 200
         elif self.type == 'teleport':

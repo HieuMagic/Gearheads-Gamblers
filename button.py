@@ -36,14 +36,16 @@ class Button:
 			self.text = self.font.render(self.text_input, True, self.base_color)
 
 class CustomButton:
-	def __init__(self, game, text, img1, img2, pos):
+	def __init__(self, game, text, img1, img2, pos, type = None):
 		#Core attributes
 		self.game = game
 		self.original_y_pos = pos[1]
-	
+		self.type = type
+		self.pos = pos
 		#Unclicked image
 		self.img1 = img1
 		self.img1_rect = self.img1.get_rect(center = pos)
+		self.current_img = self.img1
 
 		#Clicked image
 		self.img2 = img2
@@ -53,17 +55,42 @@ class CustomButton:
 		self.text = self.game.LightPixel_font.render(text, True, '#FFFFFF')
 		self.text_rect = self.text.get_rect(center = pos)
 				
-	def draw(self):
+	def update(self):
+		#Idea
+		#---#
 		mouse_pos = pygame.mouse.get_pos()
-		self.game.display.blit(self.img1, self.img1_rect)
-		if self.img1_rect.collidepoint(mouse_pos):
-			if pygame.mouse.get_pressed()[0]:
-				self.game.display.blit(self.img2, self.img2_rect)
-				self.game.display.blit(self.text, self.text_rect)
-			else:
-				self.game.display.blit(self.img1, self.img1_rect)
-				self.game.display.blit(self.text, self.text_rect)
-
+		self.current_img_rect = self.current_img.get_rect(center = self.pos)
+		if self.current_img_rect.collidepoint(mouse_pos) and pygame.mouse.get_pressed()[0] == 1:
+			self.current_img = self.img2
+			self.current_img_rect = self.current_img.get_rect(center = self.pos)
+			self.game.button_pressed = True
+		elif self.current_img_rect.collidepoint(mouse_pos) and pygame.mouse.get_pressed()[0] == 0 and self.game.button_pressed == True:
+			self.current_img = self.img2
+			self.current_img_rect = self.current_img.get_rect(center = self.pos)
+			self.button_logic()
+			self.game.button_pressed = False
+		self.game.display.blit(self.current_img, self.current_img_rect)
+  
+	def button_logic(self):
+		if self.type == 'bet_plus':
+			if self.game.bet + 50 <= self.game.money:
+				self.game.bet += 50
+		elif self.type == 'bet_minus':
+			if self.game.bet > 100:
+				self.game.bet -= 50
+		elif self.type == 'choose_map_left':
+			self.game.map_state -= 1
+			self.game.map_index -= 1
+			if self.game.map_state == 0:
+				self.game.map_state = 4
+				self.game.map_index = 5
+		elif self.type == 'choose_map_right':
+			self.game.map_state += 1
+			self.game.map_index += 1
+			if self.game.map_state == 5:
+				self.game.map_index = 1
+				self.game.map_state = 0
+    
 class AnimatedButton:
 	pressed = False
 	def __init__(self,game,text,width,height,pos,elevation):
