@@ -78,10 +78,14 @@ class CustomButton:
 		elif self.type == 'bet_minus':
 			if self.game.bet > 100:
 				self.game.bet -= 50
+		elif self.type == 'bet_all':
+			self.game.bet = self.game.money
+		elif self.type == 'bet_50':
+			self.game.bet = int(self.game.money / 2)
 		elif self.type == 'choose_map_left':
 			self.game.map_state -= 1
 			self.game.map_index -= 1
-			if self.game.map_state == 0:
+			if self.game.map_state == 0 or self.game.map_state == -1:
 				self.game.map_state = 4
 				self.game.map_index = 5
 		elif self.type == 'choose_map_right':
@@ -142,4 +146,3 @@ class AnimatedButton:
 		else:
 			self.dynamic_elecation = self.elevation
 			self.top_color = '#475F77'
-    

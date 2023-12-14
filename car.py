@@ -3,7 +3,7 @@ from utils import update_assets
 from random import uniform
 
 class Car(pygame.sprite.Sprite):
-    def __init__(self,game,set,type,status, x_pos, y_pos):
+    def __init__(self,game,set,type,status, pos):
         super().__init__()
         self.game = game
         self.player_index = type
@@ -12,7 +12,9 @@ class Car(pygame.sprite.Sprite):
         self.acceleration = 0.2
         self.max_speed = 7
         self.speed = 1
-        self.pos = (x_pos, y_pos)
+        self.pos = pos
+        self.x_pos = self.pos[0]
+        self.y_pos = self.pos[1]
         self.index = 0
         self.reached_finish_line = False
         self.rank = None
@@ -20,7 +22,6 @@ class Car(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.game.assets['cars'][int(self.index % len(self.game.assets['cars']))], (100, 50))
         self.rect = self.image.get_rect(center = self.pos)
 
-        
     def movement(self):
         #Generate random speed
         self.acceleration = uniform(-1, 1)
@@ -39,6 +40,9 @@ class Car(pygame.sprite.Sprite):
         if self.rect.x > self.game.finish_line_x:
             self.speed = 0
             self.rect.x = self.game.finish_line_x
+        
+        if self.game.race_started == False:
+            self.speed = 0
             
         #Update the position
         self.rect.x += abs(self.speed)
@@ -71,9 +75,18 @@ class Car(pygame.sprite.Sprite):
             ratios = height_ratio.get(self.game.map_size)
             if ratios:
                 for i, car in enumerate(self.game.car_group.sprites()):
-                    car.rect.y = self.game.height * ratios[i]
-        
-
-        
-        
-        
+                    car.rect.y = self.game.height * ratios[i]     
+                    
+    def reset(self):
+        self.player_index = type
+        self.player_set = set
+        self.acceleration = 0.2
+        self.max_speed = 7
+        self.speed = 0
+        self.pos = (self.x_pos, self.y_pos)
+        self.index = 0
+        self.reached_finish_line = False
+        self.rank = None
+        self.triggered = False
+        self.image = pygame.transform.scale(self.game.assets['cars'][int(self.index % len(self.game.assets['cars']))], (100, 50))
+        self.rect = self.image.get_rect(center = self.pos)

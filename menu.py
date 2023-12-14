@@ -13,7 +13,12 @@ def main_menu(self, game):
     self.mouse_pos = pygame.mouse.get_pos()
     self.base_color = "WHITE"
     self.hovering_color = "#e2446c"
-
+    
+    #Game name
+    self.game_name = self.Arcade_font.render("Gearheads&Gamblers", False, self.base_color)
+    self.game_name_rect = self.game_name.get_rect(center = (self.width / 2, self.height * 0.1))
+    self.display.blit(self.game_name, self.game_name_rect)
+    
     #Choose map and load button
     button_load(self)
     if self.MAP_SIZE.checkForInput(self.mouse_pos):
@@ -29,20 +34,21 @@ def main_menu(self, game):
             self.map_size = self.game.map_size
             self.button_pressed = False
         
-    #Game name
-    self.game_name = self.Arcade_font.render("Gearheads&Gamblers", False, self.base_color)
-    self.game_name_rect = self.game_name.get_rect(center = (self.width / 2, self.height * 0.1))
-    self.display.blit(self.game_name, self.game_name_rect)
-
+    #Custom button
     self.right_button = CustomButton(self, None, pygame.image.load('data/button/right_button_1.png'), pygame.image.load('data/button/right_button_2.png'),
                                      (self.width * 0.3, self.height * 0.525), 'choose_map_right')
-    self.right_button.update()
 
     self.left_button = CustomButton(self, None, pygame.image.load('data/button/left_button_1.png'), pygame.image.load('data/button/left_button_2.png'),
                                     (self.width * 0.7, self.height * 0.525), 'choose_map_left')
+    self.right_button.update()
     self.left_button.update()
 
-    map_load(self)
+    #Load map
+    self.map_surface = self.assets['map_preview'][int(self.map_state) % len(self.assets['map_preview'])]
+    self.map_rect = self.map_surface.get_rect(center = (self.width / 2, self.height * 0.525))
+    self.display.blit(pygame.transform.rotozoom(self.map_surface, 0, 1), self.map_rect)  
+    
+    #---#
     check_button_pressed(self)
      
 def credits_menu(self):
@@ -104,6 +110,21 @@ def credits_menu(self):
             self.button_pressed = False
 
 def minigame_menu(self, game):
+    self.game = game
+    #background
+    self.display.blit(pygame.transform.scale(self.assets['background'], (self.width, self.height)), (0,0))
+
+    #Text
+    self.limit_text = self.BiggerLightPixel_font.render("! LIMIT FOR MINIGAME: 100 !", False, self.base_color)
+    self.limit_text_rect = self.limit_text.get_rect(center = (self.width / 2, self.height * 0.1))
+    
+    #Variable
+    self.mouse_pos = pygame.mouse.get_pos()
+    self.base_color = "WHITE"
+    self.hovering_color = "#e2446c"
+    
+    
+def minigame1(self, game):
     self.game = game
     #background
     self.display.blit(pygame.transform.scale(self.assets['background'], (self.width, self.height)), (0,0))
@@ -204,8 +225,14 @@ def choose_player_set_menu(self):
                                             (self.width * 0.65, self.height * 0.8), 'bet_plus')
     self.bet_money_down_button = CustomButton(self, None, pygame.image.load('data/button/minus_1.png'), pygame.image.load('data/button/minus_0.png'),
                                               (self.width * 0.35, self.height * 0.8), 'bet_minus')
+    self.bet_money_50_button = CustomButton(self, None, pygame.image.load('data/button/bet_50_1.png'), pygame.image.load('data/button/bet_50_0.png'),
+                                            (self.width * 0.7, self.height * 0.8), 'bet_50')
+    self.bet_money_all_button = CustomButton(self, None, pygame.image.load('data/button/bet_all_1.png'), pygame.image.load('data/button/bet_all_0.png'),
+                                             (self.width * 0.75, self.height * 0.8), 'bet_all')
     self.bet_money_up_button.update()
     self.bet_money_down_button.update()
+    self.bet_money_50_button.update()
+    self.bet_money_all_button.update()
     
     #Display the player
     for player in self.player_group:
@@ -274,7 +301,8 @@ def choose_player_menu(self):
     self.player.update()
     
     #Display the player's car
-    self.car.pos = (self.width * 0.6, self.height / 2)
+    self.car.x_pos = self.width * 0.6
+    self.car.y_pos = self.height / 2
     self.car.player_set = self.player_set
     self.car.player_index = self.player_index
     self.car.update()
@@ -301,8 +329,8 @@ def game_play(self):
     
     #If all cars reached the finish line, display the next button
     self.NEXT_BUTTON = Button(image = None, pos = (self.width * 0.9, self.height * 0.2), text_input = "NEXT>",
-                              font = self.LightPixel_font, base_color = "WHITE", hovering_color = self.hovering_color)
-    if all([car.rank for car in self.car_group.sprites()]): 
+                              font = self.LightPixel_font, base_color = "WHITE", hovering_color = self.hovering_color)        
+    if all([car.rank for car in self.car_group.sprites()]):           
         for button in [self.NEXT_BUTTON]:
             button.changeColor(self.mouse_pos)
             button.update(self.display)
@@ -319,15 +347,112 @@ def game_play(self):
         if pygame.mouse.get_pressed()[0] == 1:
             self.button_pressed = True
         elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
-            self.game_state = 6 # Change to leaderboard
+            if all([car.rank for car in self.car_group.sprites()]): 
+                for car in self.car_group.sprites():
+                    if car.player_index == self.car.player_index:
+                        if car.rank == 1:
+                            self.money += int(self.bet)
+                        elif car.rank == 2:
+                            self.money += int(self.bet * 0.75)
+                        elif car.rank == 3:
+                            self.money += 0
+                        elif car.rank == 4:
+                            self.money -= int(self.bet * 0.75)
+                        elif car.rank == 5:
+                            self.money -= int(self.bet)
+                    # car.reset()
+            self.game.race_started = False
+            self.game.rank = 0
+            self.game_state = 6
             self.button_pressed = False
     
 def leaderboard(self):
+    #Variable
+    self.base_color = "WHITE"
+    self.hovering_color = "#e2446c"
+    
     #Background
-    self.display.blit(pygame.transform.scale(self.assets['background'], (self.width, self.height)), (0,0))
+    self.display.blit(pygame.transform.scale(self.assets['board'], (self.width, self.height)), (0,0))
     
-    #
+    #Game name
+    self.game_name = self.Arcade_font.render("Gearheads&Gamblers", False, self.base_color)
+    self.line1_surf = self.LightPixel_font.render("LEADERBOARD", False, self.base_color)
+    self.game_name_rect = self.game_name.get_rect(center = (self.width / 2, self.height * 0.15))
+    self.line1_rect = self.line1_surf.get_rect(center = (self.width*0.3, self.height * 0.25))
+    self.display.blit(self.game_name, self.game_name_rect)
+    self.display.blit(self.line1_surf, self.line1_rect)
+
+    #Define the top 5
+    for car in self.car_group.sprites():
+        if car.rank == 1:
+            self.top1 = car.player_index
+        elif car.rank == 2:
+            self.top2 = car.player_index
+        elif car.rank == 3:
+            self.top3 = car.player_index
+        elif car.rank == 4:
+            self.top4 = car.player_index
+        elif car.rank == 5:
+            self.top5 = car.player_index
     
+    #Top text
+    self.top1_surf = self.LightPixel_font.render(f"Top 1: {self.top1}", False, self.base_color)
+    self.top2_surf = self.LightPixel_font.render(f"Top 2: {self.top2}", False, self.base_color)
+    self.top3_surf = self.LightPixel_font.render(f"Top 3: {self.top3}", False, self.base_color)
+    self.top4_surf = self.LightPixel_font.render(f"Top 4: {self.top4}", False, self.base_color)
+    self.top5_surf = self.LightPixel_font.render(f"Top 5: {self.top5}", False, self.base_color)
+    self.top1_rect = self.top1_surf.get_rect(center = (self.width*0.3, self.height * 0.4))
+    self.top2_rect = self.top2_surf.get_rect(center = (self.width*0.3, self.height * 0.5))
+    self.top3_rect = self.top3_surf.get_rect(center = (self.width*0.3, self.height * 0.6))
+    self.top4_rect = self.top4_surf.get_rect(center = (self.width*0.3, self.height * 0.7))
+    self.top5_rect = self.top5_surf.get_rect(center = (self.width*0.3, self.height * 0.8))
+    self.display.blit(self.top1_surf, self.top1_rect)
+    self.display.blit(self.top2_surf, self.top2_rect)
+    self.display.blit(self.top3_surf, self.top3_rect)
+    self.display.blit(self.top4_surf, self.top4_rect)
+    self.display.blit(self.top5_surf, self.top5_rect)
+
+    #Results
+    for car in self.car_group.sprites():
+        if car.player_index == self.car.player_index:
+            self.result = car.rank
+    self.result_surf = self.LightPixel_font.render("Result", False, self.base_color)
+    self.show_rank_surf = self.LightPixel_font.render(f"Your rank: {self.result}", False, self.base_color)
+    self.money_surf = self.LightPixel_font.render(f"Total money: {self.money}", False, self.base_color)
+    if self.result == 1:
+        self.money_diff_surf = self.LightPixel_font.render(f"You earned: {int(self.bet)}", False, self.base_color)
+    elif self.result == 2:
+        self.money_diff_surf = self.LightPixel_font.render(f"You earned: {int(self.bet * 0.75)}", False, self.base_color)
+    elif self.result == 3:
+        self.money_diff_surf = self.LightPixel_font.render(f"You earned: 0", False, self.base_color)
+    elif self.result == 4:
+        self.money_diff_surf = self.LightPixel_font.render(f"You lost: {int(self.bet * 0.75)}", False, self.base_color)
+    elif self.result == 5:
+        self.money_diff_surf = self.LightPixel_font.render(f"You lost: {int(self.bet)}", False, self.base_color)
+    self.money_diff_rect = self.money_diff_surf.get_rect(center = (self.width*0.7, self.height * 0.55))
+    self.result_rect = self.result_surf.get_rect(center = (self.width*0.7, self.height * 0.25))
+    self.show_rank_rect = self.show_rank_surf.get_rect(center = (self.width*0.7, self.height * 0.45))
+    self.money_rect = self.money_surf.get_rect(center = (self.width*0.7, self.height * 0.65))
+    self.display.blit(self.result_surf, self.result_rect)
+    self.display.blit(self.show_rank_surf, self.show_rank_rect)
+    self.display.blit(self.money_surf, self.money_rect)
+    self.display.blit(self.money_diff_surf, self.money_diff_rect)
+    
+    #Next button
+    self.NEXT_BUTTON = Button(image = None, pos = (self.width * 0.85, self.height * 0.85), text_input = "NEXT>",
+                            font = self.BiggerLightPixel_font, base_color = "WHITE", hovering_color = self.hovering_color) 
+    for button in [self.NEXT_BUTTON]:
+        button.changeColor(self.mouse_pos)
+        button.update(self.display)
+    
+    if self.NEXT_BUTTON.checkForInput(self.mouse_pos): 
+        if pygame.mouse.get_pressed()[0] == 1:
+            self.button_pressed = True
+        elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
+            self.game_state = 2
+            for car in self.car_group.sprites():
+                car.reset()
+            self.button_pressed = False
 #Button    
 def button_load(self):
     button_animation(self) 
@@ -426,12 +551,7 @@ def button_animation(self):
     self.choose_player_set_text = self.choose_player_set_texts[(int(self.text_state) % 2)]    
     self.confirm_text = self.confirm_texts[(int(self.text_state) % 2)]
     self.choose_player_text = self.choose_player_texts[(int(self.text_state) % 2)]
-#Choose Map
-def map_load(self):
-    self.map_surface = self.assets['map_preview'][int(self.map_state) % len(self.assets['map_preview'])]
-    self.map_rect = self.map_surface.get_rect(center = (self.width / 2, self.height * 0.525))
-    self.display.blit(pygame.transform.rotozoom(self.map_surface, 0, 1), self.map_rect)  
-      
+
 #Choose Player Set    
 def player_load(self):
     update_assets(self, self.assets)

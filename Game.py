@@ -6,8 +6,9 @@ from player import Player
 from car import Car
 from buff import Buff
 
-class Game:     
+class Game:
     def __init__(self):
+        pygame.mixer.pre_init(44100, 16, 2, 4096)
         pygame.init()
         #Sreen and surface...
         self.screen_size = [1400, 700]
@@ -15,8 +16,8 @@ class Game:
         self.width = self.screen.get_width()
         self.height = self.screen.get_height()
         self.display = pygame.Surface(((self.screen.get_width(), self.screen.get_height())))
-        self.cursor_point = pygame.transform.scale2x(pygame.image.load('data/cursor/cursor_point.png'))
-        self.cursor_click = pygame.transform.scale2x(pygame.image.load('data/cursor/cursor_click.png'))
+        self.cursor_point = pygame.image.load('data/cursor/cursor_point2.png').convert_alpha()
+        self.cursor_click = pygame.image.load('data/cursor/cursor_click2.png').convert_alpha()
         pygame.display.set_caption('Gearheads&Gamblers')
 
         #Clock, font... 
@@ -30,7 +31,7 @@ class Game:
         
         #User's variable
         self.player_name = "ChuHieuMagic"
-        self.money = 999      
+        self.money = 1000
         self.bet = 200
         
         #Game variable
@@ -51,17 +52,18 @@ class Game:
             'map_preview' : load_images("data/map/preview"),
             'map' : load_image(f'data/map/{self.map_index}/{self.map_size}.png'),
             'cars' : load_images(f'data/graphics/car/{self.player_set}/{self.player_index}'),
-            'buffs' : load_images('data/magic')
+            'buffs' : load_images('data/magic'),
+            'board' : load_image('data/graphics/background/board.png'),
         }
         
         #Image
-        self.button_image = pygame.image.load('data/small.png')
-        self.dialogue_image = pygame.image.load('data/dialogue.png')
-        self.long_button_image = pygame.image.load('data/long.png')
+        self.button_image = pygame.image.load('data/small.png').convert_alpha()
+        self.dialogue_image = pygame.image.load('data/dialogue.png').convert_alpha()
+        self.long_button_image = pygame.image.load('data/long.png').convert_alpha()
         
         #Game control variable
         self.game_running = True
-        self.game_state = 2
+        self.game_state = 1
         self.main_menu_state = 1
         self.size_state = 0
         self.credits_state = 0
@@ -87,12 +89,12 @@ class Game:
         #Car
         # (Set, Type, Status) #
         self.car_group = pygame.sprite.Group()
-        self.car1 = self.car_group.add(Car(self,self.player_set,1,self.player_status,100, self.height * 0.55))
-        self.car2 = self.car_group.add(Car(self,self.player_set,2,self.player_status,100, self.height * 0.65))
-        self.car3 = self.car_group.add(Car(self,self.player_set,3,self.player_status,100, self.height * 0.75))
-        self.car4 = self.car_group.add(Car(self,self.player_set,4,self.player_status,100, self.height * 0.85))
-        self.car5 = self.car_group.add(Car(self,self.player_set,5,self.player_status,100, self.height * 0.94))
-        self.car = Car(self,self.player_set,self.player_index,self.player_status,self.width * 0.6, self.height / 2)
+        self.car1 = self.car_group.add(Car(self,self.player_set,1,self.player_status,(100, self.height * 0.55)))
+        self.car2 = self.car_group.add(Car(self,self.player_set,2,self.player_status,(100, self.height * 0.65)))
+        self.car3 = self.car_group.add(Car(self,self.player_set,3,self.player_status,(100, self.height * 0.75)))
+        self.car4 = self.car_group.add(Car(self,self.player_set,4,self.player_status,(100, self.height * 0.85)))
+        self.car5 = self.car_group.add(Car(self,self.player_set,5,self.player_status,(100, self.height * 0.94)))
+        self.car = Car(self,self.player_set,self.player_index,self.player_status,(self.width * 0.6, self.height / 2))
 
         #Timer
         self.buff_group = pygame.sprite.Group()
@@ -101,7 +103,12 @@ class Game:
         self.start_time = 0
         
     def current(self):
-        self.current_time = pygame.time.get_ticks() - self.start_time
+        if self.game_state != 5:
+            self.current_time = 0
+        else:
+            self.current_time = pygame.time.get_ticks() - self.start_time
+        if self.current_time > 4000:
+            self.current_time = 0
         return self.current_time
             
     def run(self):
@@ -151,7 +158,7 @@ class Game:
                         self.buff_group.add(Buff(self))
                 self.buff_group.update()
                 
-                if self.current() < 3000:
+                if self.current() < 3000 and self.current() > 0:
                     self.count_down_text = self.BiggerLightPixel_font.render(str(3 - int(self.current() / 1000)), 0, (111, 196, 169))
                     self.count_down_rect = self.count_down_text.get_rect(center = (self.display.get_width() / 2, self.display.get_height() / 2))
                     self.display.blit(self.count_down_text, self.count_down_rect)
