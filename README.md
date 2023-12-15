@@ -7,6 +7,7 @@
 - [Installation](#installation)
 - [Screenshot](#screenshot)
 - [Contributing](#contributing)
+- [Credits](#credits)
 - [License](#license)
 
 ## Installation
