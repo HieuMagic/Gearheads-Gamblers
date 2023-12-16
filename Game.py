@@ -1,7 +1,7 @@
 import pygame
 from sys import exit
 from utils import load_image, load_images
-from menu import main_menu, choose_player_set_menu, choose_player_menu, credits_menu, minigame_menu, game_play, button_animation, leaderboard
+from menu import *
 from player import Player
 from car import Car
 from buff import Buff
@@ -39,6 +39,7 @@ class Game:
         self.player_index = 1
         self.player_status = 1
         self.race_started = False
+        self.base_color = "WHITE"
         
         #Map variable
         self.map_index = 1
@@ -54,6 +55,7 @@ class Game:
             'cars' : load_images(f'data/graphics/car/{self.player_set}/{self.player_index}'),
             'buffs' : load_images('data/magic'),
             'board' : load_image('data/graphics/background/board.png'),
+            'ranking' : load_image('data/graphics/background/ranking.png'),
         }
         
         #Image
@@ -75,7 +77,7 @@ class Game:
         self.text_state = 0
         self.finish_line_x = self.width * 0.9
         self.rank = 0
-
+        
         #Player 
         # (Set, Type, Status) #
         self.player_group = pygame.sprite.Group()
@@ -84,17 +86,19 @@ class Game:
         self.player3 = self.player_group.add(Player(self,self.player_set,3,self.player_status,(self.width * 0.5, self.height / 2)))
         self.player4 = self.player_group.add(Player(self,self.player_set,4,self.player_status,(self.width * 0.65, self.height / 2)))
         self.player5 = self.player_group.add(Player(self,self.player_set,5,self.player_status,(self.width * 0.8, self.height / 2)))
-        self.player =  Player(self,self.player_set,self.player_index,self.player_status,(self.width * 0.3, self.height / 2))
+        self.main_player = pygame.sprite.GroupSingle()
+        self.player =  self.main_player.add(Player(self,self.player_set,self.player_index,self.player_status,(self.width * 0.3, self.height / 2)))
         
         #Car
         # (Set, Type, Status) #
-        self.car_group = pygame.sprite.Group()
+        self.car_group = pygame.sprite.Group()  
         self.car1 = self.car_group.add(Car(self,self.player_set,1,self.player_status,(100, self.height * 0.55)))
         self.car2 = self.car_group.add(Car(self,self.player_set,2,self.player_status,(100, self.height * 0.65)))
         self.car3 = self.car_group.add(Car(self,self.player_set,3,self.player_status,(100, self.height * 0.75)))
         self.car4 = self.car_group.add(Car(self,self.player_set,4,self.player_status,(100, self.height * 0.85)))
         self.car5 = self.car_group.add(Car(self,self.player_set,5,self.player_status,(100, self.height * 0.94)))
-        self.car = Car(self,self.player_set,self.player_index,self.player_status,(self.width * 0.6, self.height / 2))
+        self.main_car = pygame.sprite.GroupSingle()
+        self.car = self.main_car.add(Car(self,self.player_set,self.player_index,self.player_status,(self.width * 0.6, self.height / 2)))
 
         #Timer
         self.buff_group = pygame.sprite.Group()
@@ -136,7 +140,7 @@ class Game:
                 if self.credits_state == 1:
                     credits_menu(self)
                 if self.minigame_state == 1:
-                    minigame_menu(self, self)
+                    minigame1(self, self)
                                 
             #State 3
             elif self.game_state == 3:
@@ -171,6 +175,10 @@ class Game:
                     
             #State 6
             elif self.game_state == 6:
+                ranking(self)
+                
+            #State 7
+            elif self.game_state == 7:
                 leaderboard(self)
                 
             #Mouse cursor

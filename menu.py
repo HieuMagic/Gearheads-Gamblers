@@ -2,6 +2,7 @@ import pygame
 from button import Button, AnimatedButton, CustomButton
 from utils import get_text_size, get_image_size, update_assets, count_child_folders
 from car import Car
+from player import Player
 
 # Menu
 def main_menu(self, game):
@@ -123,7 +124,6 @@ def minigame_menu(self, game):
     self.base_color = "WHITE"
     self.hovering_color = "#e2446c"
     
-    
 def minigame1(self, game):
     self.game = game
     #background
@@ -237,6 +237,7 @@ def choose_player_set_menu(self):
     #Display the player
     for player in self.player_group:
         player.player_set = self.player_set
+        player.update_img()
         player.update()
  
 def choose_player_menu(self):
@@ -268,24 +269,6 @@ def choose_player_menu(self):
             self.game_state = 3
             self.button_pressed = False
 
-    if self.NEXT_BUTTON.checkForInput(self.mouse_pos):
-        if pygame.mouse.get_pressed()[0] == 1:
-            self.button_pressed = True
-        elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
-            self.player_index += 1
-            if self.player_index == 6:
-                self.player_index = 1
-            self.button_pressed = False
-    
-    if self.PREV_BUTTON.checkForInput(self.mouse_pos):
-        if pygame.mouse.get_pressed()[0] == 1:
-            self.button_pressed = True
-        elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
-            self.player_index -= 1
-            if self.player_index == 0:
-                self.player_index = 5
-            self.button_pressed = False
-
     if self.CONFIRM_BUTTON.checkForInput(self.mouse_pos):
         if pygame.mouse.get_pressed()[0] == 1:
             self.button_pressed = True
@@ -294,18 +277,38 @@ def choose_player_menu(self):
                 self.game_state = 5
                 self.button_pressed = False
 
-    #Display the player
-    self.player.pos = (self.width * 0.4, self.height / 2)
-    self.player.player_set = self.player_set    
-    self.player.player_index = self.player_index
-    self.player.update()
-    
-    #Display the player's car
-    self.car.x_pos = self.width * 0.6
-    self.car.y_pos = self.height / 2
-    self.car.player_set = self.player_set
-    self.car.player_index = self.player_index
-    self.car.update()
+    #Change player & car
+    for player, car in zip(self.main_player, self.main_car):
+        if self.NEXT_BUTTON.checkForInput(self.mouse_pos):
+            if pygame.mouse.get_pressed()[0] == 1:
+                self.button_pressed = True
+            elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
+                player.player_index += 1
+                if player.player_index == 6:
+                    player.player_index = 1
+                self.button_pressed = False
+        
+        if self.PREV_BUTTON.checkForInput(self.mouse_pos):
+            if pygame.mouse.get_pressed()[0] == 1:
+                self.button_pressed = True
+            elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
+                player.player_index -= 1
+                if player.player_index == 0:
+                    player.player_index = 5
+                self.button_pressed = False
+                
+        #Display the player
+        player.player_set = self.player_set
+        player.pos = (self.width * 0.4, self.height / 2)
+        player.update_img()
+        player.update()
+
+        #Display the player's car
+        car.x_pos = self.width * 0.6
+        car.y_pos = self.height / 2
+        car.player_set = self.player_set
+        car.player_index = player.player_index
+        car.update()
 
 #Main game
 def game_play(self):
@@ -348,21 +351,22 @@ def game_play(self):
             self.button_pressed = True
         elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
             if all([car.rank for car in self.car_group.sprites()]): 
-                for car in self.car_group.sprites():
-                    if car.player_index == self.car.player_index:
-                        if car.rank == 1:
-                            self.money += int(self.bet)
-                        elif car.rank == 2:
-                            self.money += int(self.bet * 0.75)
-                        elif car.rank == 3:
-                            self.money += 0
-                        elif car.rank == 4:
-                            self.money -= int(self.bet * 0.75)
-                        elif car.rank == 5:
-                            self.money -= int(self.bet)
+                for car in self.car_group:
+                    for player in self.main_player:
+                        if car.player_index == player.player_index:
+                            print(car.rank)
+                            if car.rank == 1:
+                                self.money += int(self.bet)
+                            elif car.rank == 2:
+                                self.money += int(self.bet * 0.75)
+                            elif car.rank == 3:
+                                self.money += 0
+                            elif car.rank == 4:
+                                self.money -= int(self.bet * 0.75)
+                            elif car.rank == 5:
+                                self.money -= int(self.bet)
                     # car.reset()
             self.game.race_started = False
-            self.game.rank = 0
             self.game_state = 6
             self.button_pressed = False
     
@@ -412,10 +416,11 @@ def leaderboard(self):
     self.display.blit(self.top4_surf, self.top4_rect)
     self.display.blit(self.top5_surf, self.top5_rect)
 
-    #Results
-    for car in self.car_group.sprites():
-        if car.player_index == self.car.player_index:
-            self.result = car.rank
+    #Results)
+    for car in self.car_group:
+        for player in self.main_player:
+            if car.player_index == player.player_index:
+                self.result = car.rank
     self.result_surf = self.LightPixel_font.render("Result", False, self.base_color)
     self.show_rank_surf = self.LightPixel_font.render(f"Your rank: {self.result}", False, self.base_color)
     self.money_surf = self.LightPixel_font.render(f"Total money: {self.money}", False, self.base_color)
@@ -429,6 +434,7 @@ def leaderboard(self):
         self.money_diff_surf = self.LightPixel_font.render(f"You lost: {int(self.bet * 0.75)}", False, self.base_color)
     elif self.result == 5:
         self.money_diff_surf = self.LightPixel_font.render(f"You lost: {int(self.bet)}", False, self.base_color)
+        
     self.money_diff_rect = self.money_diff_surf.get_rect(center = (self.width*0.7, self.height * 0.55))
     self.result_rect = self.result_surf.get_rect(center = (self.width*0.7, self.height * 0.25))
     self.show_rank_rect = self.show_rank_surf.get_rect(center = (self.width*0.7, self.height * 0.45))
@@ -452,6 +458,97 @@ def leaderboard(self):
             self.game_state = 2
             for car in self.car_group.sprites():
                 car.reset()
+
+            for player in self.player_group:
+                player.player_status = 1
+                
+            self.rank = 0
+            self.button_pressed = False
+
+def ranking(self):
+    #Backgound
+    self.display.blit(pygame.transform.scale(self.assets['ranking'], (self.width, self.height)), (0,0))
+    
+    #Variable
+    self.base_color = "WHITE"
+
+    #Text
+    self.top1_text = self.LightPixel_font.render(f"Top 1", False, "RED")
+    self.top2_text = self.LightPixel_font.render(f"Top 2", False, "GREEN")
+    self.top3_text = self.LightPixel_font.render(f"Top 3", False, "BLUE")
+    self.top4_text = self.LightPixel_font.render(f"Top 4", False, self.base_color)
+    self.top5_text = self.LightPixel_font.render(f"Top 5", False, self.base_color)
+    
+    self.top1_rect = self.top1_text.get_rect(center = (self.width*0.48, self.height * 0.485))
+    self.top2_rect = self.top2_text.get_rect(center = (self.width*0.308, self.height * 0.61))
+    self.top3_rect = self.top3_text.get_rect(center = (self.width*0.7, self.height * 0.61))
+    self.top4_rect = self.top4_text.get_rect(center = (self.width*0.125, self.height * 0.86))
+    self.top5_rect = self.top5_text.get_rect(center = (self.width*0.88, self.height * 0.86))
+    
+    self.display.blit(self.top1_text, self.top1_rect)
+    self.display.blit(self.top2_text, self.top2_rect)
+    self.display.blit(self.top3_text, self.top3_rect)
+    self.display.blit(self.top4_text, self.top4_rect)
+    self.display.blit(self.top5_text, self.top5_rect)
+    
+    # Show the image of the all players and cars matching the rank
+    for car, player in zip(self.car_group.sprites(), self.player_group.sprites()):
+        if car.rank == 1:
+            player.player_index = car.player_index
+            player.player_status = 2
+            player.index += 0.1
+            player.update()
+            player.image = self.assets['players'][int(player.index % len(self.assets['players']))]
+            player.rect = player.image.get_rect(center = player.pos)
+            player.pos = (self.width * 0.515, self.height * 0.26)
+
+
+        elif car.rank == 2:
+            player.player_index = car.player_index
+            player.player_status = 2
+            player.index += 0.1
+            player.update()
+            player.image = self.assets['players'][int(player.index % len(self.assets['players']))]
+            player.rect = player.image.get_rect(center = player.pos)
+            player.pos = (self.width * 0.3, self.height * 0.4)
+  
+        elif car.rank == 3:
+            player.player_index = car.player_index
+            player.player_status = 2
+            player.index += 0.1
+            player.update()
+            player.image = self.assets['players'][int(player.index % len(self.assets['players']))]
+            player.rect = player.image.get_rect(center = player.pos)
+            player.pos = (self.width * 0.7, self.height * 0.4)
+
+        elif car.rank == 4:
+            self.rank4 = car.player_index
+            player.index += 0.1
+            player.update()
+            player.image = self.assets['players'][int(player.index % len(self.assets['players']))]
+            player.rect = player.image.get_rect(center = player.pos)
+            player.pos = (self.width * 0.13, self.height * 0.65)
+           
+        elif car.rank == 5:
+            self.rank5 = car.player_index
+            player.index += 0.1
+            player.update()
+            player.image = self.assets['players'][int(player.index % len(self.assets['players']))]
+            player.rect = player.image.get_rect(center = player.pos)
+            player.pos = (self.width * 0.88, self.height * 0.65)
+    
+    self.NEXT_BUTTON = Button(image = None, pos = (self.width * 0.9, self.height * 0.9), text_input = "NEXT>",
+                              font = self.LightPixel_font, base_color = self.base_color, hovering_color = self.hovering_color)
+    
+    for button in [self.NEXT_BUTTON]:
+        button.changeColor(self.mouse_pos)
+        button.update(self.display)
+    
+    if self.NEXT_BUTTON.checkForInput(self.mouse_pos): 
+        if pygame.mouse.get_pressed()[0] == 1:
+            self.button_pressed = True
+        elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
+            self.game_state = 7
             self.button_pressed = False
 #Button    
 def button_load(self):
@@ -560,23 +657,4 @@ def player_load(self):
     self.player_size = get_image_size(self,self.player_surface)
     self.player_rect = self.player_surface.get_rect(bottomright = (self.width / 2 - self.player_size[0], self.height / 2 - self.player_size[1]))
     self.display.blit(pygame.transform.rotozoom(self.player_surface, 0, 5), self.player_rect)
-
-def choose_player_right(self):
-    if pygame.mouse.get_pressed()[0] == 1:
-        self.button_pressed = True
-    elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
-            self.player_index += 1
-            if self.player_index == count_child_folders('data/player/') + 1:
-                self.player_index = 1
-            self.button_pressed = False
-            
-def choose_player_left(self):
-    if pygame.mouse.get_pressed()[0] == 1:
-        self.button_pressed = True
-    elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
-            self.player_index -= 1
-            if self.player_index == 0:
-                self.player_index = count_child_folders('data/player/')
-            self.button_pressed = False
-
-        
+      
