@@ -23,7 +23,6 @@ def update_assets(self, assets):
     assets['players'] = load_images(f'data/player/{self.player_set}/{self.player_index}/{self.player_status}/')
     assets['map'] : load_image(f'data/map/{self.map_index}/{self.map_size}.png')
 
-
 def count_child_folders(folder_path):
     count = 0
     for entry in os.scandir(folder_path):
