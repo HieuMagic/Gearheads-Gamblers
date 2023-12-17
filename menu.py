@@ -3,6 +3,7 @@ import pygame
 from button import Button, AnimatedButton, CustomButton
 from utils import get_text_size, get_image_size, update_assets, count_child_folders
 from car import Car
+from player import Player
 
 # Menu
 def main_menu(self, game):
