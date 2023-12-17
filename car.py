@@ -22,7 +22,7 @@ class Car(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.game.assets['cars'][int(self.index % len(self.game.assets['cars']))], (100, 50))
         self.rect = self.image.get_rect(center = self.pos)
         self.finish_fx = pygame.mixer.Sound('data/sounds/finish.wav')
-        self.finish_fx.set_volume(0.5)
+        self.finish_fx.set_volume(0.2)
         self.count = 0
         self.stop = False
         

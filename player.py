@@ -12,9 +12,13 @@ class Player(pygame.sprite.Sprite):
         self.pos = pos
         self.image = pygame.transform.rotozoom(self.game.assets['players'][int(self.index % len(self.game.assets['players']))], 0, 1.5)
         self.rect = self.image.get_rect(center = self.pos)
+        self.player_name = self.game.player_names[f'{self.player_set + 1}'][self.player_index - 1]
         
     def update(self):
         update_assets(self, self.game.assets)
+        if self.player_set == 5:
+            self.player_set = 0
+        self.player_name = self.game.player_names[f'{self.player_set + 1}'][self.player_index - 1]
         self.index += 0.1
         self.rect = self.image.get_rect(center = self.pos)
         self.game.display.blit(self.image, self.rect)

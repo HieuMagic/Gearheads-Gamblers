@@ -612,6 +612,14 @@ class Game:
             'ranking' : load_image('data/graphics/background/ranking.png'),
         }
         
+        self.player_names = {
+            '1' : ['Death','Eyes','Magician','Warrior', 'Witch'],
+            '2' : ['Dai Hiep', 'Dinh Hieu', 'Quang Duy', 'Manh Hien', 'Trong Hieu'],
+            '3' : ['Chicken','Cow','Frog','Supeerduck', 'Worm'],
+            '4' : ['Hoodiewoodie','Knight','Samurai','Satyr', 'Wizard'],
+            '5' : ['Burger','Coin', 'Fire','Slime', 'Thunder']
+        }
+        
         self.language_resources = {
             'en' : {
                 'Press SPACE' : '>Press SPACE to continue<',
@@ -655,6 +663,8 @@ class Game:
                 'Lose game' : 'Lose game',
                 'Total money win' : 'Total money win on gambling:',
                 'Total money lost' : 'Total money lost on gambling:',
+                'How to play' : '<How to play>',
+                'You' : ' (You)',
             },
 
             'vn': {
@@ -699,6 +709,8 @@ class Game:
                 'Lose game' : 'So tran thua',
                 'Total money win' : 'Tong so tien thang cuoc:',
                 'Total money lost' : 'Tong so tien thua cuoc:',
+                'How to play' : '<Huong dan>',
+                'You' : ' (Ban)',
             }
         }
         
@@ -737,6 +749,7 @@ class Game:
         self.finish_line_x = self.width * 0.9
         self.rank = 0
         self.music_state = 1
+        self.how_to_play_state = 0
         
         #Player 
         # (Set, Type, Status) #
@@ -802,12 +815,14 @@ class Game:
             elif self.game_state == 2:
                 if self.main_menu_state == 1:
                     main_menu(self, self)
-                if self.credits_state == 1:
+                elif self.credits_state == 1:
                     credits_menu(self)
-                if self.minigame_state == 1:
+                elif self.minigame_state == 1:
                     minigame1(self, self)
-                if self.history_state == 1:
+                elif self.history_state == 1:
                     history_menu(self, self)
+                elif self.how_to_play_state == 1:
+                    how_to_play(self)
                                 
             #State 3
             elif self.game_state == 3:

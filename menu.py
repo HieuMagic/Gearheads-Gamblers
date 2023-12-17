@@ -89,11 +89,17 @@ def main_menu(self, game):
             self.credits_state = 1
 
     #Check if minigame button is pressed
-    if self.MINIGAME.checkForInput(self.mouse_pos):
-        if pygame.mouse.get_pressed()[0] == 1 and self.minigame_state == 0:
-            self.click_fx.play()
-            self.main_menu_state = 0
-            self.minigame_state = 1
+    if self.money < 100:
+        self.MINIGAME = Button(image = self.button_image, pos = ((self.width * 0.05 + get_text_size(self, self.get_text('Minigame'))[0] / 2),(self.height * 0.7)), text_input = self.get_text('Minigame'),
+                            font = self.LightPixel_font, base_color = self.base_color, hovering_color = self.hovering_color)
+        for button in [self.MINIGAME]:
+            button.changeColor(self.mouse_pos)
+            button.update(self.display)
+        if self.MINIGAME.checkForInput(self.mouse_pos):
+            if pygame.mouse.get_pressed()[0] == 1 and self.minigame_state == 0:
+                self.click_fx.play()
+                self.main_menu_state = 0
+                self.minigame_state = 1
             
     #Check if quit button is pressed
     if self.QUIT.checkForInput(self.mouse_pos):
@@ -142,6 +148,27 @@ def main_menu(self, game):
                     self.music_state = 1
                     pygame.mixer.music.unpause()
                 self.button_pressed = False
+                
+    #How to play
+    self.HOW_TO_PLAY = Button(image = self.button_image, pos = ((self.width * 0.95 - get_text_size(self, self.get_text('How to play'))[0] / 2),(self.height * 0.8)), text_input = self.get_text('How to play'),
+                            font = self.LightPixel_font, base_color = self.base_color, hovering_color = self.hovering_color)
+    
+    for button in [self.HOW_TO_PLAY]:
+        button.changeColor(self.mouse_pos)
+        button.update(self.display)
+        
+    if self.HOW_TO_PLAY.checkForInput(self.mouse_pos):
+        if pygame.mouse.get_pressed()[0] == 1 and self.how_to_play_state == 0:
+            self.click_fx.play()
+            self.main_menu_state = 0
+            self.how_to_play_state = 1
+   
+def how_to_play(self):
+    #Background
+    self.display.blit(pygame.transform.scale(self.assets['background'], (self.width, self.height)), (0,0))
+    
+    #Display intruction image
+    
     
 def credits_menu(self):
     #Background
@@ -470,6 +497,10 @@ def choose_player_menu(self):
         car.rect = car.image.get_rect(center = car.pos)
         self.display.blit(car.image, car.rect)
 
+        #Display the player's name
+        self.player_name_text = self.LightPixel_font.render(f"{player.player_name}", False, "#f6695a")
+        self.player_name_text_rect = self.player_name_text.get_rect(center = (self.width / 2, self.height * 0.3))
+        self.display.blit(self.player_name_text, self.player_name_text_rect)
 #Main game
 def game_play(self):
     Car.update_pos(self, self.game)
@@ -516,7 +547,6 @@ def game_play(self):
                 for car in self.car_group:
                     for player in self.main_player:
                         if car.player_index == player.player_index:
-                            print(car.rank)
                             if car.rank == 1:
                                 self.money += int(self.bet)
                                 pygame.mixer.music.load('data/sounds/win.wav')
@@ -609,8 +639,8 @@ def ranking(self):
             player.rect = player.image.get_rect(center = player.pos)
             player.pos = (self.width * 0.88, self.height * 0.65)
     
-    self.NEXT_BUTTON = Button(image = None, pos = (self.width * 0.85, self.height * 0.3), text_input = self.get_text('Next'),
-                              font = self.LightPixel_font, base_color = self.base_color, hovering_color = self.hovering_color)
+    self.NEXT_BUTTON = Button(image = self.button_image, pos = (self.width * 0.5, self.height * 0.8), text_input = self.get_text('Next'),
+                              font = self.BiggerLightPixel_font, base_color = self.base_color, hovering_color = self.hovering_color)
     
     for button in [self.NEXT_BUTTON]:
         button.changeColor(self.mouse_pos)
@@ -642,17 +672,29 @@ def leaderboard(self, game):
     self.display.blit(self.line1_surf, self.line1_rect)
 
     #Define the top 5
-    for car in self.car_group.sprites():
+    for car, player in zip(self.car_group.sprites(), self.player_group.sprites()):
         if car.rank == 1:
-            self.top1 = car.player_index
+            self.top1 = player.player_name
         elif car.rank == 2:
-            self.top2 = car.player_index
+            self.top2 = player.player_name
         elif car.rank == 3:
-            self.top3 = car.player_index
+            self.top3 = player.player_name
         elif car.rank == 4:
-            self.top4 = car.player_index
+            self.top4 = player.player_name
         elif car.rank == 5:
-            self.top5 = car.player_index
+            self.top5 = player.player_name
+
+    for player in self.main_player:
+        if self.top1 == player.player_name:
+            self.top1 = player.player_name + self.get_text('You')
+        elif self.top2 == player.player_name:
+            self.top2 = player.player_name + self.get_text('You')
+        elif self.top3 == player.player_name:
+            self.top3 = player.player_name + self.get_text('You')
+        elif self.top4 == player.player_name:
+            self.top4 = player.player_name + self.get_text('You')
+        elif self.top5 == player.player_name:
+            self.top5 = player.player_name + self.get_text('You')
     
     #Top text
     self.top1_surf = self.LightPixel_font.render(f"{self.get_text('Top')} 1: {self.top1}", False, self.base_color)
@@ -712,7 +754,7 @@ def leaderboard(self, game):
     self.display.blit(self.money_diff_surf, self.money_diff_rect)
     
     #Next button
-    self.NEXT_BUTTON = Button(image = None, pos = (self.width * 0.85, self.height * 0.3), text_input = self.get_text('Next'),
+    self.NEXT_BUTTON = Button(image = self.button_image, pos = (self.width * 0.85, self.height * 0.8), text_input = self.get_text('Next'),
                             font = self.BiggerLightPixel_font, base_color = "WHITE", hovering_color = self.hovering_color) 
     for button in [self.NEXT_BUTTON]:
         button.changeColor(self.mouse_pos)
@@ -760,11 +802,9 @@ def button_load(self):
                        font = self.LightPixel_font, base_color = self.base_color, hovering_color = self.hovering_color)
     self.CREDITS = Button(image = self.button_image, pos = ((self.width * 0.95 - get_text_size(self, self.get_text('Credits'))[0] / 2),(self.height * 0.7)), text_input = self.get_text('Credits'),
                           font = self.LightPixel_font, base_color = self.base_color, hovering_color = self.hovering_color)
-    self.MINIGAME = Button(image = self.button_image, pos = ((self.width * 0.95 - get_text_size(self, self.get_text('Minigame'))[0] / 2),(self.height * 0.8)), text_input = self.get_text('Minigame'),
-                           font = self.LightPixel_font, base_color = self.base_color, hovering_color = self.hovering_color)
-    self.MONEY = Button(image = self.button_image, pos = ((self.width * 0.05 + get_text_size(self, f"{self.get_text('Money')} {self.money}")[0] * 0.55), self.height * 0.5), text_input = f"{self.get_text('Money')} {self.money}",
+    self.MONEY = Button(image = self.button_image, pos = ((self.width * 0.05 + get_text_size(self, f"{self.get_text('Money')} {self.money}")[0] * 0.5), self.height * 0.5), text_input = f"{self.get_text('Money')} {self.money}",
                         font = self.LightPixel_font, base_color = self.hovering_color, hovering_color = self.hovering_color)
-    self.NAME = Button(image = self.long_button_image , pos = ((self.width * 0.05 + get_text_size(self, f"{self.get_text('Hi')} {self.player_name}!")[0] * 0.5), self.height * 0.3), text_input = f"{self.get_text('Hi')} {self.player_name}!",
+    self.NAME = Button(image = self.button_image , pos = ((self.width * 0.05 + get_text_size(self, f"{self.get_text('Hi')} {self.player_name}!")[0] * 0.5), self.height * 0.3), text_input = f"{self.get_text('Hi')} {self.player_name}!",
                        font = self.LightPixel_font, base_color = self.hovering_color, hovering_color = self.hovering_color)
     self.QUIT = Button(image = self.button_image, pos = ((self.width * 0.05 + get_text_size(self, f"{self.get_text('Quit')}")[0] * 0.55), self.height * 0.9), text_input = self.get_text('Quit'),
                        font = self.LightPixel_font, base_color = self.base_color, hovering_color = self.hovering_color)
@@ -772,7 +812,7 @@ def button_load(self):
                            font = self.LightPixel_font, base_color = self.base_color, hovering_color = self.base_color)
     #Button update
     for button in [self.START, self.LANGUAGE, self.HISTORY, self.MUSIC, self.SIZE,
-                   self.CREDITS, self.MINIGAME, self.QUIT, self.MAP_SIZE]:
+                   self.CREDITS, self.QUIT, self.MAP_SIZE]:
         button.changeColor(self.mouse_pos)
         button.update(self.display)
     
