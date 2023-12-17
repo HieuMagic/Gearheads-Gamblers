@@ -76,15 +76,29 @@ class CustomButton:
 	def button_logic(self):
 		self.click_fx.play()
 		if self.type == 'bet_plus':
-			if self.game.bet + 50 <= self.game.money:
-				self.game.bet += 50
+			if self.game.bet + 20 <= self.game.money:
+				self.game.bet += 20
 		elif self.type == 'bet_minus':
-			if self.game.bet > 100:
-				self.game.bet -= 50
+			if self.game.bet > 100 and self.game.bet - 20 >= 100:
+				self.game.bet -= 20
 		elif self.type == 'bet_all':
-			self.game.bet = self.game.money
+			if self.game.money >= 100:
+				self.game.bet = self.game.money
 		elif self.type == 'bet_50':
-			self.game.bet = int(self.game.money / 2)
+			if self.game.money >= 100 and self.game.bet <= self.game.money * 0.5:
+				self.game.bet += int(self.game.money / 2)
+		elif self.type == 'bet +20':
+			if self.game.money >= 100 and self.game.bet <= self.game.money * 0.8:
+				self.game.bet += int(self.game.money / 5)
+		elif self.type == 'bet +10' and self.game.bet <= self.game.money * 0.9:
+			if self.game.money >= 100:
+				self.game.bet += int(self.game.money / 10)
+		elif self.type == 'bet -20':
+			if self.game.money >= 100 and self.game.bet - int(self.game.money / 5) > 100:
+				self.game.bet -= int(self.game.money / 5)
+		elif self.type == 'bet -10':
+			if self.game.money >= 100 and self.game.bet - int(self.game.money / 10) > 100:
+				self.game.bet -= int(self.game.money / 10)
 		elif self.type == 'choose_map_left':
 			self.game.map_state -= 1
 			self.game.map_index -= 1
@@ -97,7 +111,14 @@ class CustomButton:
 			if self.game.map_state == 5:
 				self.game.map_index = 1
 				self.game.map_state = 0
-    
+		elif self.type == 'how_left':
+			self.game.how_index -= 1
+			if self.game.how_index == -1:
+				self.game.how_index = 2
+		elif self.type == 'how_right':
+			self.game.how_index += 1
+			if self.game.how_index == 3:
+				self.game.how_index = 0
 class AnimatedButton:
 	pressed = False
 	def __init__(self,game,text,width,height,pos,elevation):

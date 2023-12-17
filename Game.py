@@ -1,13 +1,12 @@
-from utils import load_image, load_images
-from pygame.locals import *
-from pygame import mixer
+import pygame, sys, smtplib, random, re, time, Aready, TakePhotos, os, FaceID, random, datetime
+from utils import load_image, load_images, get_information
 from docx import Document
+from pygame import mixer
+from pygame.locals import *
 from player import Player
 from buff import Buff
 from car import Car
 from menu import *
-from utils import get_information
-import pygame, sys, smtplib, random, re, time, Aready, TakePhotos, os, FaceID, random, button
 
 
 class TextInput:
@@ -859,8 +858,7 @@ class Game:
             'ranking' : load_image('data/graphics/background/ranking.png'),
             'minigame1' : load_image('data/graphics/background/minigame1.png'),
             'minigame2' : load_image('data/graphics/background/minigame2.png'),
-            'how_to_play' : load_image('data/graphics/background/how_to_play.png'),
-            'pond' : load_image('Temp\isometric-pond.png'),
+            'how_to_play' : load_images('data/graphics/how_to_play'),
         }
         
         self.player_names = {
@@ -1008,7 +1006,7 @@ class Game:
         self.screen_trigger = False
         self.minigame1_state = 0
         self.minigame2_state = 0
-        
+        self.how_index = 1
         #Player 
         # (Set, Type, Status) #
         self.player_group = pygame.sprite.Group()
@@ -1036,7 +1034,15 @@ class Game:
         self.buff_timer = pygame.USEREVENT + 1
         pygame.time.set_timer(self.buff_timer, 1000)
         self.start_time = 0
-        
+    
+    def scrshoot(self): #Thêm vào hàm Game trong Game.py
+        self.current_datetime = datetime.now()
+        self.date_time_str = self.current_datetime.strftime("%H-%M_%d-%m-%Y")
+        self.scrshoot_file_path = f"screenshot_folder/img-{self.date_time_str}.jpg"
+        self.capture_region = (self.width*0.05, self.height*0.05, self.width*0.9, self.height*0.9)
+        self.captured_surface = self.screen.subsurface(pygame.Rect(self.capture_region))
+        pygame.image.save(self.captured_surface, self.scrshoot_file_path)
+     
     def current(self):
         if self.game_state != 5:
             self.current_time = 0
@@ -1139,11 +1145,12 @@ class Game:
                 ranking(self)
                 
             #State 7
-            elif self.game_state == 7:
+            elif self.game_state == 7: 
                 leaderboard(self, self)
-
+                
             #State 8
             elif self.game_state == 8:
+                self.scrshoot()
                 self.trigger = False
                 self.money = get_information(self.ID)[3]
                 if self.money < 100:

@@ -1,8 +1,10 @@
-from docx import Document
-import pygame
+from utils import get_text_size, get_image_size, update_assets
 from button import Button, AnimatedButton, CustomButton
-from utils import get_text_size, get_image_size, update_assets, count_child_folders
+from datetime import datetime
+from docx import Document
 from car import Car
+import pygame
+
 
 # Menu
 def main_menu(self, game):
@@ -176,7 +178,7 @@ def how_to_play(self):
     self.display.fill("#bbddd7")
     
     #Display intruction image
-    self.instruction_image = pygame.transform.scale(self.assets['how_to_play'], (self.width * 0.7, self.height * 0.7))
+    self.instruction_image = pygame.transform.scale(self.assets['how_to_play'][self.how_index], (self.width * 0.7, self.height * 0.7))
     self.instruction_rect = self.instruction_image.get_rect(center = (self.width / 2, self.height / 2))
     self.display.blit(self.instruction_image, self.instruction_rect)
     
@@ -196,6 +198,14 @@ def how_to_play(self):
             self.main_menu_state = 1
             self.button_pressed = False  
     
+    self.right_button = CustomButton(self, None, pygame.image.load('data/button/right_button_1.png'), pygame.image.load('data/button/right_button_2.png'),
+                                     (self.width * 0.1, self.height * 0.5), 'how_right')
+
+    self.left_button = CustomButton(self, None, pygame.image.load('data/button/left_button_1.png'), pygame.image.load('data/button/left_button_2.png'),
+                                    (self.width * 0.9, self.height * 0.5), 'how_left')
+    self.right_button.update()
+    self.left_button.update()
+     
 def credits_menu(self):
     #Background
     self.display.blit(pygame.transform.scale(self.assets['background'], (self.width, self.height)), (0,0))
@@ -476,13 +486,26 @@ def choose_player_set_menu(self):
     self.bet_money_down_button = CustomButton(self, None, pygame.image.load('data/button/minus_1.png'), pygame.image.load('data/button/minus_0.png'),
                                               (self.width * 0.35, self.height * 0.8), 'bet_minus')
     self.bet_money_50_button = CustomButton(self, None, pygame.image.load('data/button/bet_50_1.png'), pygame.image.load('data/button/bet_50_0.png'),
-                                            (self.width * 0.7, self.height * 0.8), 'bet_50')
+                                            (self.width * 0.8, self.height * 0.8), 'bet_50')
     self.bet_money_all_button = CustomButton(self, None, pygame.image.load('data/button/bet_all_1.png'), pygame.image.load('data/button/bet_all_0.png'),
-                                             (self.width * 0.75, self.height * 0.8), 'bet_all')
+                                             (self.width * 0.85, self.height * 0.8), 'bet_all')
+    self.bet_money_20_button_1 = CustomButton(self, None, pygame.image.load('data/button/bet_20_1.png'), pygame.image.load('data/button/bet_20_0.png'),
+                                            (self.width * 0.75, self.height * 0.8), 'bet +20')
+    self.bet_money_10_button_1 = CustomButton(self, None, pygame.image.load('data/button/bet_10_1.png'), pygame.image.load('data/button/bet_10_0.png'),
+                                            (self.width * 0.7, self.height * 0.8), 'bet +10')
+    self.bet_money_20_button_0 = CustomButton(self, None, pygame.image.load('data/button/bet_20_1.png'), pygame.image.load('data/button/bet_20_0.png'),
+                                            (self.width * 0.30, self.height * 0.8), 'bet -20')
+    self.bet_money_10_button_0 = CustomButton(self, None, pygame.image.load('data/button/bet_10_1.png'), pygame.image.load('data/button/bet_10_0.png'),
+                                            (self.width * 0.25, self.height * 0.8), 'bet -10')
+    
     self.bet_money_up_button.update()
     self.bet_money_down_button.update()
     self.bet_money_50_button.update()
     self.bet_money_all_button.update()
+    self.bet_money_20_button_1.update()
+    self.bet_money_10_button_1.update()
+    self.bet_money_20_button_0.update()
+    self.bet_money_10_button_0.update()
     
     #Display the player
     for player in self.player_group:
@@ -788,7 +811,7 @@ def leaderboard(self, game):
     self.display.blit(self.top4_surf, self.top4_rect)
     self.display.blit(self.top5_surf, self.top5_rect)
 
-    #Results)
+    #Results
     for car in self.car_group:
         for player in self.main_player:
             if car.player_index == player.player_index:
@@ -840,6 +863,8 @@ def leaderboard(self, game):
             self.button_pressed = True
         elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
             self.click_fx.play()
+            self.lines = [f"Top1: {self.top1}", '\n',f"Top2: {self.top2}", '\n',f"Top3: {self.top3}", '\n',f"Top4: {self.top4}", '\n',f"Top5: {self.top5}", '\n',f"Your rank: {self.result}", '\n',f"Your money: {self.money}", '\n',f"Money earn/lost: {self.money_diff}"]
+            write_to_txt(self.lines)
             for car in self.car_group.sprites():
                 car.reset()
             for player in self.player_group:
@@ -860,7 +885,7 @@ def leaderboard(self, game):
                 self.bet = 0
             else:
                 self.bet = self.money
-    return self.result
+
 
 #Button    
 def button_load(self):
@@ -973,3 +998,11 @@ def load_sound(self):
 
 def get_text(self, key):
     return language_resources[self.game.current_language].get(key, '')
+
+#Write into .txt file
+def write_to_txt(self): 
+    current_datetime = datetime.now()
+    date_time_str = current_datetime.strftime("%H-%M_%d-%m-%Y")
+    text_file_path = f"text_folder/text-{date_time_str}.txt"
+    text_file = open(text_file_path, "w")   
+    text_file.writelines(self)
