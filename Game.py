@@ -1,10 +1,12 @@
 from utils import load_image, load_images
 from pygame.locals import *
+from pygame import mixer
 from docx import Document
 from player import Player
 from buff import Buff
 from car import Car
 from menu import *
+from utils import get_information
 import pygame, sys, smtplib, random, re, time, Aready, TakePhotos, os, FaceID
 
 class TextInput:
@@ -55,8 +57,8 @@ class Gmail:
         return re.match(self.pattern, email) is not None
     def send_email(self, receiver_email):
         try:
-            self.sender_email = "daihiep10092005@gmail.com"     
-            self.password = "jmmq mczp qyfi pngi"
+            self.sender_email = "gearheadngambler@gmail.com"     
+            self.password = "aadm cprn zipr fhpw"
             self.verification_code = ''.join(random.choice('0123456789') for i in range(6))
             self.session = smtplib.SMTP('smtp.gmail.com', 587)
             self.session.starttls()
@@ -148,7 +150,7 @@ class Login_Game:
     def get_ID(self):
         return self.ID_Login[0]
     
-    def save_account(self, username, password, money, match, win, lose):
+    def save_account(self, username, password, money, match, win, lose, win_money, lose_money):
         try:
             if os.path.exists(self.docx_filename):
                 doc = Document(self.docx_filename)
@@ -162,6 +164,8 @@ class Login_Game:
                 table.cell(0, 4).text = "Số trận đã chơi"
                 table.cell(0, 5).text = "Số trận thắng"
                 table.cell(0, 6).text = "Số trận thua"
+                table.cell(0, 7).text = "Tổng số tiền thắng cược"
+                table.cell(0, 8).text = "Tổng số tiền đã thua"
             if not doc.tables:
                 doc.add_table(rows=1, cols=7)
                 table = doc.tables[0]
@@ -172,6 +176,8 @@ class Login_Game:
                 table.cell(0, 4).text = "Số trận đã chơi"
                 table.cell(0, 5).text = "Số trận thắng"
                 table.cell(0, 6).text = "Số trận thua"
+                table.cell(0, 7).text = "Tổng số tiền thắng cược"
+                table.cell(0, 8).text = "Tổng số tiền đã thua"
             for table in doc.tables:
                 for row in table.rows:
                     if row.cells[1].text == username:
@@ -185,7 +191,8 @@ class Login_Game:
                             row_cells[4].text = str(match)
                             row_cells[5].text = str(win)
                             row_cells[6].text = str(lose)
-
+                            row_cells[7].text = str(win_money)
+                            row_cells[8].text = str(lose_money)
                             doc.save(self.docx_filename)
                             return True
             if len(doc.tables) > 0 and len(doc.tables[0].rows) > 1:
@@ -203,6 +210,8 @@ class Login_Game:
             row_cells[4].text = str(match)
             row_cells[5].text = str(win)
             row_cells[6].text = str(lose)
+            row_cells[7].text = str(win_money)
+            row_cells[8].text = str(lose_money)
             print('Tài khoản đã được lưu!')
             doc.save(self.docx_filename)
             return True
@@ -277,7 +286,7 @@ class Login_Game:
                         self.SignUp_button.name = self.Game_font_button.render('RESEND', True, (0, 0, 0))
                     else:
                         self.announcement_rect.update_text("Email address is not valid.Please enter your email again.")
-
+            self.samename = 0
  
     def Login(self):
         if self.mode == 'SIGN UP':
@@ -310,14 +319,15 @@ class Login_Game:
 
 
     def Send(self):
-
         if self.gmail.verification_code == self.verify_rect.text:
             self.gmail_codecheck = True
         else:
             self.verify_rect.update_text('')
             self.announcement_rect.update_text("Sorry, the verification code you entered is incorrect.")
         if self.gmail_codecheck:
-            if self.save_account(self.username_rect.text, self.password_rect.text, self.money, self.match, self.win, self.lose):
+            self.win_money = 0
+            self.lose_money = 0
+            if self.save_account(self.username_rect.text, self.password_rect.text, self.money, self.match, self.win, self.lose, self.win_money, self.lose_money):
                 return True
             else:
                 self.announcement_rect.update_text(f"The account '{self.username_rect.text}' already exists. Cannot add.")
@@ -539,6 +549,7 @@ Login_Game.Run()
 class Game:
     def __init__(self):
         pygame.mixer.pre_init(44100, 16, 2, 4096)
+        mixer.init()
         pygame.init()
         #Sreen and surface...
         self.screen_size = [1400, 700]
@@ -567,6 +578,11 @@ class Game:
             self.bet = 0
         else:
             self.bet = get_information(self.ID)[3]
+        self.total_game = get_information(self.ID)[4]
+        self.win_game = get_information(self.ID)[5]
+        self.lose_game = get_information(self.ID)[6]
+        self.win_money = get_information(self.ID)[7]
+        self.lose_money = get_information(self.ID)[8]
         
         #Game variable
         self.player_set = 1
@@ -574,11 +590,16 @@ class Game:
         self.player_status = 1
         self.race_started = False
         self.base_color = "WHITE"
-        
+        self.current_language = 'en'
+        self.trigger = False
+        self.buff_type = 'backward'
         #Map variable
         self.map_index = 1
-        self.map_size = "SMALL"
-        
+        if self.current_language == 'vn':
+            self.map_size = "NHO"
+        else:
+            self.map_size = "SMALL"
+
         #Assets
         self.assets = {
             'loadgame' : load_image('data/graphics/interface/BACKGROUND_2.png'),
@@ -587,10 +608,114 @@ class Game:
             'map_preview' : load_images("data/map/preview"),
             'map' : load_image(f'data/map/{self.map_index}/{self.map_size}.png'),
             'cars' : load_images(f'data/graphics/car/{self.player_set}/{self.player_index}'),
-            'buffs' : load_images('data/magic'),
             'board' : load_image('data/graphics/background/board.png'),
             'ranking' : load_image('data/graphics/background/ranking.png'),
         }
+        
+        self.language_resources = {
+            'en' : {
+                'Press SPACE' : '>Press SPACE to continue<',
+                'Hi' : 'Hi',
+                'Quit' : '<QUIT>',
+                'Language' : '<LANGUAGE>',
+                'Music' : '<MUSIC>',
+                'History' : '<HISTORY>',
+                'Minigame' : '<MINIGAME>',
+                'Map size' : 'MAP SIZE',
+                'Credits' : '<CREDITS>',
+                'Size' : '<SIZE>',
+                'Select map' : '>SELECT THIS MAP<',
+                'Small' : 'SMALL',
+                'Medium' : 'MEDIUM',
+                'Large' : 'LARGE',
+                'Money' : 'Money',
+                'Back' : '<BACK',
+                'Previous' : '<PREV',
+                'Next' : 'NEXT>',
+                'Bet money' : 'BET MONEY',
+                'Choose your player set' : '>CHOOSE YOUR PLAYER SET<',
+                'Choose your player' : '>CHOOSE YOUR PLAYER<',
+                'Confirm' : '<CONFIRM>',
+                'Rank' : 'Rank',
+                'Leaderboard' : 'LEADERBOARD',
+                'Result' : 'RESULT',
+                'Your rank' : 'Your rank',
+                'You earned' : 'You earned',
+                'You lost' : 'You lost',
+                'Total money' : 'Total money',
+                'Top' : 'Top',
+                'Project end term' : 'PROJECT END-TERM',
+                'Project manager' : 'PROJECT MANAGER:',
+                'Bussiness analyst' : 'BUSINESS ANALYST:',
+                'Developers' : 'DEVELOPERS:',
+                'Return' : '<RETURN>',
+                'Minigame limit' : '! LIMIT FOR MINIGAME MONEY: 100 !',
+                'Total game' : 'Total game',
+                'Win game' : 'Win game',
+                'Lose game' : 'Lose game',
+                'Total money win' : 'Total money win on gambling:',
+                'Total money lost' : 'Total money lost on gambling:',
+            },
+
+            'vn': {
+                'Press SPACE' : '>Nhan SPACE de tiep tuc<',
+                'Hi' : 'Chao',
+                'Quit' : '<Thoat>',
+                'Language' : '<NGON NGU>',
+                'Music' : '<AM NHAC>',
+                'History' : '<LICH SU>',
+                'Select map' : '>CHON BAN DO<',
+                'Map size' : 'KICH THUOC BAN DO',
+                'Small' : 'NHO',
+                'Medium' : 'VUA',
+                'Large' : 'LON',
+                'Money' : 'Tien',
+                'Minigame' : '<MINIGAME>',
+                'Size' : '<KICH CO>',
+                'Credits' : '<THONG TIN>',
+                'Back' : '<QUAY LAI',
+                'Previous' : '<TRUOC',
+                'Next' : 'TIEP>',
+                'Bet money' : 'DAT CUOC',
+                'Choose your player set' : '>CHON BO NGUOI CHOI<',
+                'Confirm' : '<XAC NHAN>',
+                'Choose your player' : 'CHON NGUOI CHOI',
+                'Rank' : 'Xep hang',
+                'Leaderboard' : 'BANG XEP HANG',
+                'Result' : 'Ket qua',
+                'Your rank' : 'Ban xep hang',
+                'You earned' : 'Ban da kiem duoc',
+                'You lost' : 'Ban da mat',
+                'Total money' : 'Tong so tien',
+                'Top' : 'Hang',
+                'Project end term' : 'DO AN CUOI KY',
+                'Project manager' : 'TRUONG NHOM:',
+                'Bussiness analyst' : 'PHAN TICH THIET KE:',
+                'Developers' : 'LAP TRINH VIEN:',
+                'Return' : '<QUAY LAI>',
+                'Minigame limit' : '! GIOI HAN TIEN TU MINIGAME: 100 !',
+                'Total game' : 'Tong so tran',
+                'Win game' : 'So tran thang',
+                'Lose game' : 'So tran thua',
+                'Total money win' : 'Tong so tien thang cuoc:',
+                'Total money lost' : 'Tong so tien thua cuoc:',
+            }
+        }
+        
+        #Sound
+        pygame.mixer.music.load("data/sounds/theme.wav")
+        pygame.mixer.music.queue("data/sounds/race.wav")
+        pygame.mixer.music.set_volume(0.1)
+        self.click_fx = pygame.mixer.Sound('data/sounds/click.wav')
+        self.click_fx.set_volume(0.5)
+        self.menu_in_fx = pygame.mixer.Sound('data/sounds/menu_in.wav')
+        self.menu_in_fx.set_volume(0.5)
+        self.menu_out_fx = pygame.mixer.Sound('data/sounds/menu_out.wav')
+        self.menu_out_fx.set_volume(0.2)
+        self.confirm1_fx = pygame.mixer.Sound('data/sounds/confirm1.wav')
+        self.confirm1_fx.set_volume(0.1)
+        self.confirm2_fx = pygame.mixer.Sound('data/sounds/confirm2.wav')
+        self.confirm2_fx.set_volume(0.1)
         
         #Image
         self.button_image = pygame.image.load('data/small.png').convert_alpha()
@@ -604,13 +729,14 @@ class Game:
         self.size_state = 0
         self.credits_state = 0
         self.minigame_state = 0
-        
+        self.history_state = 0
         self.player_state = 0
         self.map_state = 0
         self.button_pressed = False
         self.text_state = 0
         self.finish_line_x = self.width * 0.9
         self.rank = 0
+        self.music_state = 1
         
         #Player 
         # (Set, Type, Status) #
@@ -637,7 +763,7 @@ class Game:
         #Timer
         self.buff_group = pygame.sprite.Group()
         self.buff_timer = pygame.USEREVENT + 1
-        pygame.time.set_timer(self.buff_timer, 2000)
+        pygame.time.set_timer(self.buff_timer, 1000)
         self.start_time = 0
         
     def current(self):
@@ -648,7 +774,10 @@ class Game:
         if self.current_time > 4000:
             self.current_time = 0
         return self.current_time
-            
+    
+    def get_text(self, key):
+        return self.language_resources[self.current_language].get(key, '')
+    
     def run(self):
         while self.game_running:
             #Update variable
@@ -661,10 +790,12 @@ class Game:
             if self.game_state == 1:
                 button_animation(self)
                 self.display.blit(pygame.transform.scale(self.assets['loadgame'], (self.width, self.height)), (0, 0))
-                self.startgame_surface = self.LightPixel_font.render(self.startgame_text, 0, (111, 196, 169))
+                self.startgame_surface = self.LightPixel_font.render(self.get_text('Press SPACE'), 0, (111, 196, 169))
                 self.startgame_rect = self.startgame_surface.get_rect(center = (self.display.get_width() / 2, self.display.get_height() * 0.875))
                 self.display.blit(self.startgame_surface, self.startgame_rect)
                 if pygame.key.get_pressed()[pygame.K_SPACE]:
+                    self.confirm1_fx.play()
+                    pygame.mixer.music.play(-1, 0, 3000) 
                     self.game_state = 2
             
             #State 2
@@ -675,6 +806,8 @@ class Game:
                     credits_menu(self)
                 if self.minigame_state == 1:
                     minigame1(self, self)
+                if self.history_state == 1:
+                    history_menu(self, self)
                                 
             #State 3
             elif self.game_state == 3:
@@ -714,6 +847,21 @@ class Game:
             #State 7
             elif self.game_state == 7:
                 leaderboard(self, self)
+
+            #State 8
+            elif self.game_state == 8:
+                self.trigger = False
+                self.money = get_information(self.ID)[3]
+                if self.money < 100:
+                    self.bet = 0
+                else:
+                    self.bet = get_information(self.ID)[3]
+                self.total_game = get_information(self.ID)[4]
+                self.win_game = get_information(self.ID)[5]
+                self.lose_game = get_information(self.ID)[6]
+                self.win_money = get_information(self.ID)[7]
+                self.lose_money = get_information(self.ID)[8]
+                self.game_state = 2
                 
             #Mouse cursor
             pygame.mouse.set_visible(False)

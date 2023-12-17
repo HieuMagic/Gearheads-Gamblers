@@ -42,6 +42,8 @@ class CustomButton:
 		self.original_y_pos = pos[1]
 		self.type = type
 		self.pos = pos
+		self.click_fx = pygame.mixer.Sound('data/sounds/click.wav')
+		self.click_fx.set_volume(0.5)
 		#Unclicked image
 		self.img1 = img1
 		self.img1_rect = self.img1.get_rect(center = pos)
@@ -72,6 +74,7 @@ class CustomButton:
 		self.game.display.blit(self.current_img, self.current_img_rect)
   
 	def button_logic(self):
+		self.click_fx.play()
 		if self.type == 'bet_plus':
 			if self.game.bet + 50 <= self.game.money:
 				self.game.bet += 50

@@ -25,12 +25,11 @@ def Mahoa(images):
 encodeListKnow = Mahoa(images)
 
 #start webcam
-cap = cv2.VideoCapture(0)
-
 def FaceID(namelist):
     checkFace = 0
     mytest = 0
-
+    cap = cv2.VideoCapture(0)
+    
     while not checkFace:
         ret, frame= cap.read()
         framS = cv2.resize(frame,(0,0),None,fx=0.5,fy=0.5)
