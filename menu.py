@@ -67,16 +67,19 @@ def main_menu(self, game):
             self.button_pressed = True
         elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
             if self.size_state == 0:
+                self.game.fullscreen = False
                 self.screen_size = [1200, 600]
                 self.screen = pygame.display.set_mode((self.screen_size[0], self.screen_size[1]))
                 self.size_state = 1
             elif self.size_state == 1:
+                self.game.fullscreen = False
                 self.screen_size = [1400, 700]
                 self.screen = pygame.display.set_mode((self.screen_size[0], self.screen_size[1]))
                 self.size_state = 2
             elif self.size_state == 2:
                 self.screen_size = [1920, 1080]
                 self.screen = pygame.display.set_mode((self.screen_size[0], self.screen_size[1]), pygame.FULLSCREEN)
+                self.game.fullscreen = True
                 self.size_state = 0
             self.click_fx.play()
             self.button_pressed = False
@@ -95,11 +98,16 @@ def main_menu(self, game):
         for button in [self.MINIGAME]:
             button.changeColor(self.mouse_pos)
             button.update(self.display)
+
         if self.MINIGAME.checkForInput(self.mouse_pos):
-            if pygame.mouse.get_pressed()[0] == 1 and self.minigame_state == 0:
+            if pygame.mouse.get_pressed()[0] == 1:
+                self.button_pressed = True
+            elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
                 self.click_fx.play()
                 self.main_menu_state = 0
                 self.minigame_state = 1
+                self.button_pressed = False
+        
             
     #Check if quit button is pressed
     if self.QUIT.checkForInput(self.mouse_pos):
@@ -165,10 +173,28 @@ def main_menu(self, game):
    
 def how_to_play(self):
     #Background
-    self.display.blit(pygame.transform.scale(self.assets['background'], (self.width, self.height)), (0,0))
+    self.display.fill("#bbddd7")
     
     #Display intruction image
+    self.instruction_image = pygame.transform.scale(self.assets['how_to_play'], (self.width * 0.7, self.height * 0.7))
+    self.instruction_rect = self.instruction_image.get_rect(center = (self.width / 2, self.height / 2))
+    self.display.blit(self.instruction_image, self.instruction_rect)
     
+    self.RETURNBUTTON = Button(image = self.button_image, pos = (self.width * 0.15, self.height * 0.9), text_input = self.get_text('Return'),
+                               font = self.LightPixel_font, base_color = self.base_color, hovering_color = self.hovering_color)
+
+    for button in [self.RETURNBUTTON]:
+        button.changeColor(self.mouse_pos)
+        button.update(self.display)
+        
+    if self.RETURNBUTTON.checkForInput(self.mouse_pos):
+        if pygame.mouse.get_pressed()[0] == 1:
+            self.button_pressed = True
+        elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
+            self.menu_out_fx.play()
+            self.how_to_play_state = 0
+            self.main_menu_state = 1
+            self.button_pressed = False  
     
 def credits_menu(self):
     #Background
@@ -287,11 +313,60 @@ def minigame_menu(self, game):
     #Text
     self.limit_text = self.BiggerLightPixel_font.render("! LIMIT FOR MINIGAME: 100 !", False, self.base_color)
     self.limit_text_rect = self.limit_text.get_rect(center = (self.width / 2, self.height * 0.1))
+    self.display.blit(self.limit_text, self.limit_text_rect)
     
     #Variable
     self.mouse_pos = pygame.mouse.get_pos()
     self.base_color = "WHITE"
     self.hovering_color = "#e2446c"
+    
+    #Show minigame image and name
+    self.minigame1_image = pygame.transform.scale(self.assets['minigame1'], (self.width * 0.4, self.height * 0.4))
+    self.minigame1_rect = self.minigame1_image.get_rect(center = (self.width * 0.25, self.height * 0.5))
+    self.minigame1_text = self.LightPixel_font.render(self.get_text('minigame1'), False, self.base_color)
+    self.minigame1_text_rect = self.minigame1_text.get_rect(center = (self.width * 0.25, self.height * 0.75))
+    self.display.blit(self.minigame1_image, self.minigame1_rect)
+    self.display.blit(self.minigame1_text, self.minigame1_text_rect)
+    self.minigame2_image = pygame.transform.scale(self.assets['minigame2'], (self.width * 0.4, self.height * 0.4))
+    self.minigame2_rect = self.minigame2_image.get_rect(center = (self.width * 0.75, self.height * 0.5))
+    self.minigame2_text = self.LightPixel_font.render(self.get_text('minigame2'), False, self.base_color)
+    self.minigame2_text_rect = self.minigame2_text.get_rect(center = (self.width * 0.75, self.height * 0.75))
+    self.display.blit(self.minigame2_image, self.minigame2_rect)
+    self.display.blit(self.minigame2_text, self.minigame2_text_rect)
+
+    if pygame.Rect.collidepoint(self.minigame1_rect, self.mouse_pos):
+        if pygame.mouse.get_pressed()[0] == 1:
+            self.button_pressed = True
+        elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
+            self.click_fx.play()
+            self.minigame_state = 0
+            self.minigame1_state = 1
+            self.button_pressed = False
+            
+    if pygame.Rect.collidepoint(self.minigame2_rect, self.mouse_pos):
+        if pygame.mouse.get_pressed()[0] == 1:
+            self.button_pressed = True
+        elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
+            self.click_fx.play()
+            self.minigame_state = 0
+            self.minigame2_state = 1
+            self.button_pressed = False
+            
+    self.RETURNBUTTON = Button(image = self.button_image, pos = (self.width * 0.5, self.height * 0.9), text_input = self.get_text('Return'),
+                               font = self.LightPixel_font, base_color = self.base_color, hovering_color = self.hovering_color)
+    
+    for button in [self.RETURNBUTTON]:
+        button.changeColor(self.mouse_pos)
+        button.update(self.display)
+    
+    if self.RETURNBUTTON.checkForInput(self.mouse_pos):
+        if pygame.mouse.get_pressed()[0] == 1:
+            self.button_pressed = True
+        elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
+            self.menu_out_fx.play()
+            self.minigame_state = 0
+            self.main_menu_state = 1
+            self.button_pressed = False
     
 def minigame1(self, game):
     self.game = game

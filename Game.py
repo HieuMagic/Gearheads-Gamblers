@@ -7,7 +7,8 @@ from buff import Buff
 from car import Car
 from menu import *
 from utils import get_information
-import pygame, sys, smtplib, random, re, time, Aready, TakePhotos, os, FaceID
+import pygame, sys, smtplib, random, re, time, Aready, TakePhotos, os, FaceID, random, button
+
 
 class TextInput:
     def __init__(self, name, screen, font, position, color, width, height):
@@ -37,7 +38,7 @@ class TextInput:
         if self.cursor_visible:
             pygame.draw.line(self.screen, (0, 0, 0), (self.name_box.right + 2, self.name_box.top + 2), (self.name_box.right + 2, self.name_box.bottom - 2), 2)
 
-class Button:
+class Button2:
     def __init__(self, name, screen, position, width, height):
         self.name = name
         self.screen = screen
@@ -143,9 +144,9 @@ class Login_Game:
         self.verify_rect = TextInput(self.verify, self.screen, self.Game_font, (self.screenWidth // 3 + 44 , self.screenHeight // 3 + 185), (255, 255, 255), 300, 30)
         self.announcement_rect = TextInput(self.announcement, self.screen, self.Game_font, (self.screenWidth // 3 , self.screenHeight // 3 + 235), (220, 240, 230), 400, 30)
         self.Setup = Box(self.setup, self.screen, self.Game_font_setup, (self.screenWidth // 3 + 200, self.screenHeight // 3 - 75), (0, 128, 0), 500, 50)
-        self.Login_button = Button(self.Game_font_button.render('LOGIN', True, (0, 0, 0)), self.screen, (self.screenWidth // 3 + 145, self.screenHeight // 3 + 285), 275, 30)
-        self.SignUp_button = Button(self.Game_font_button.render('SIGN UP', True, (0, 0, 0)), self.screen, (self.screenWidth // 3 + 145, self.screenHeight // 3 + 335), 275, 30)
-        self.send_rect = Button(self.Game_font_button_send.render('Send', True, (0, 0, 0)), self.screen, (self.screenWidth // 3 + 365, self.screenHeight // 3 + 185), 50, 30)
+        self.Login_button = Button2(self.Game_font_button.render('LOGIN', True, (0, 0, 0)), self.screen, (self.screenWidth // 3 + 145, self.screenHeight // 3 + 285), 275, 30)
+        self.SignUp_button = Button2(self.Game_font_button.render('SIGN UP', True, (0, 0, 0)), self.screen, (self.screenWidth // 3 + 145, self.screenHeight // 3 + 335), 275, 30)
+        self.send_rect = Button2(self.Game_font_button_send.render('Send', True, (0, 0, 0)), self.screen, (self.screenWidth // 3 + 365, self.screenHeight // 3 + 185), 50, 30)
 
     def get_ID(self):
         return self.ID_Login[0]
@@ -545,7 +546,252 @@ class Login_Game:
 
 Login_Game = Login_Game()
 Login_Game.Run()
+def add_mini_money(id_user, moremoney):
+	docx_filename = "Accounts.docx"
+	doc = Document(docx_filename)
+	for table in doc.tables:
+		for row in table.rows:
+			if row.cells[0].text == id_user:
+				row.cells[3].text = str(moremoney + int(row.cells[3].text))
+				doc.save(docx_filename)
+class MiniPlayer(pygame.sprite.Sprite):
+	def __init__(self):
+		super().__init__()
+		player_walk_1 = pygame.image.load('graphics/player/player_walk_1.png').convert_alpha()
+		player_walk_2 = pygame.image.load('graphics/player/player_walk_2.png').convert_alpha()
+		self.player_walk = [player_walk_1,player_walk_2]
+		self.player_index = 0
+		self.player_jump = pygame.image.load('graphics/player/jump.png').convert_alpha()
 
+		self.image = self.player_walk[self.player_index]
+		self.rect = self.image.get_rect(midbottom = (80,600))
+		self.gravity = 0
+
+		self.jump_sound = pygame.mixer.Sound('audio/jump.mp3')
+		self.jump_sound.set_volume(0.5)
+
+	def player_input(self):
+		keys = pygame.key.get_pressed()
+		if keys[pygame.K_SPACE] and self.rect.bottom >= 600:
+			self.gravity = -20
+			self.jump_sound.play()
+
+	def apply_gravity(self):
+		self.gravity += 1
+		self.rect.y += self.gravity
+		if self.rect.bottom >= 600:
+			self.rect.bottom = 600
+
+	def animation_state(self):
+		if self.rect.bottom < 600: 
+			self.image = self.player_jump
+		else:
+			self.player_index += 0.1
+			if self.player_index >= len(self.player_walk):self.player_index = 0
+			self.image = self.player_walk[int(self.player_index)]
+	
+	def update(self):
+		self.player_input()
+		self.apply_gravity()
+		self.animation_state()
+
+class Obstacle(pygame.sprite.Sprite):
+	def __init__(self,type,game):
+		super().__init__()
+		self.game = game
+		if type == 'fly':
+			fly_1 = pygame.image.load('graphics/fly/fly1.png').convert_alpha()
+			fly_2 = pygame.image.load('graphics/fly/fly2.png').convert_alpha()
+			self.frames = [fly_1,fly_2]
+			y_pos = 450
+		else:
+			snail_1 = pygame.image.load('graphics/snail/snail1.png').convert_alpha()
+			snail_2 = pygame.image.load('graphics/snail/snail2.png').convert_alpha()
+			self.frames = [snail_1,snail_2]
+			y_pos  = 600
+
+		self.animation_index = 0
+		self.image = self.frames[self.animation_index]
+		self.rect = self.image.get_rect(midbottom = (random.randint(self.game.width + 100,self.game.width + 300),y_pos))
+
+	def animation_state(self):
+		self.animation_index += 0.1 
+		if self.animation_index >= len(self.frames): self.animation_index = 0
+		self.image = self.frames[int(self.animation_index)]
+
+	def update(self):
+		self.animation_state()
+		self.rect.x -= 6
+		self.destroy()
+
+	def destroy(self):
+		if self.rect.x <= -100: 
+			self.kill()
+
+class MiniGame():
+	def display_score(self):
+		self.current_time = int(pygame.time.get_ticks() / 1000) - self.start_time
+		self.score_surf = self.test_font.render(f'Score: {self.current_time}',False,(64,64,64))
+		self.score_rect = self.score_surf.get_rect(center = (self.width/2,self.height*0.2))
+		self.display.blit(self.score_surf,self.score_rect)
+		return self.current_time
+
+	def collision_sprite(self):
+		if pygame.sprite.spritecollide(self.player.sprite,self.obstacle_group,False):
+			self.obstacle_group.empty()
+			return False
+		else: return True
+
+	def __init__(self):
+		pygame.init()
+		pygame.display.set_caption('Runner')
+		self.clock = pygame.time.Clock()
+		self.width = 1400
+		self.height = 700
+		self.screen = pygame.display.set_mode((self.width,self.height))
+		self.display = pygame.Surface((self.width,self.height))
+		self.test_font = pygame.font.Font('font/Pixeltype.ttf', 50)
+		self.game_active = False
+		self.start_time = 0
+		self.score = 0
+		self.cursor_point = pygame.image.load('data/cursor/cursor_point2.png').convert_alpha()
+		self.cursor_click = pygame.image.load('data/cursor/cursor_click2.png').convert_alpha()
+		pygame.mixer.music.load('audio/music.wav')
+		pygame.mixer.music.play(-1)
+		pygame.mixer.music.set_volume(0.2)
+		self.menu_out_fx = pygame.mixer.Sound('data/sounds/menu_out.wav')
+		self.menu_out_fx.set_volume(0.2)
+		self.mouse_pos = pygame.mouse.get_pos()
+		self.display = pygame.Surface(((self.width, self.height)))
+		self.base_color = "WHITE"
+		self.hovering_color = "#e2446c"
+		self.LightPixel_font = pygame.font.Font('data/font/LightPixel.ttf', 30)
+		self.button_image = pygame.image.load('data/small.png').convert_alpha()
+		self.RETURNBUTTON = Button(image = self.button_image, pos = (self.width * 0.15, self.height * 0.9), text_input = "<Return>",
+										font = self.LightPixel_font, base_color = self.base_color, hovering_color = self.hovering_color)
+		self.button_pressed = False
+		self.player_ID = Login_Game.get_ID()
+		self.trigger = False
+		self.screen_trigger = False
+		#Groups
+		self.player = pygame.sprite.GroupSingle()
+		self.player.add(MiniPlayer())
+
+		self.obstacle_group = pygame.sprite.Group()
+
+		self.sky_surface = pygame.transform.scale(pygame.image.load('graphics/Sky.png'), (self.width, self.height)).convert_alpha()
+		self.ground_surface = pygame.transform.scale(pygame.image.load('graphics/ground.png'), (self.width, self.height)).convert_alpha()
+
+		# Intro screen
+		self.player_stand = pygame.image.load('graphics/player/player_stand.png').convert_alpha()
+		self.player_stand = pygame.transform.rotozoom(self.player_stand,0,2)
+		self.player_stand_rect = self.player_stand.get_rect(center = (self.width/2,self.height/2))
+
+		self.game_name = self.test_font.render('Pixel Runner',False,(111,196,169))
+		self.game_name_rect = self.game_name.get_rect(center = (self.width/2,self.height*0.3))
+
+		self.game_message = self.test_font.render('Press space to run',False,(111,196,169))
+		self.game_message_rect = self.game_message.get_rect(center = (self.width/2,self.height*0.7))
+
+		# Timer 
+		self.obstacle_timer = pygame.USEREVENT + 1
+		pygame.time.set_timer(self.obstacle_timer,1500)
+		self.minigame_state = True
+	
+	def minigame(self, width, height, fullscreen):
+		while self.minigame_state:
+			for event in pygame.event.get():
+				if event.type == pygame.QUIT:
+					pygame.quit()
+					exit()
+
+				if self.game_active:
+					if event.type == self.obstacle_timer:
+						self.obstacle_group.add(Obstacle(random.choice(['fly','snail','snail','snail']), self))
+				else:
+					if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and self.trigger == False:
+						self.game_active = True
+						self.start_time = int(pygame.time.get_ticks() / 1000)
+			
+			if fullscreen and self.screen_trigger == False:
+				self.width = width
+				self.height = height
+				self.screen = pygame.display.set_mode((self.width,self.height), pygame.FULLSCREEN)
+				self.player_stand_rect = self.player_stand.get_rect(center = (self.width/2,self.height/2))
+				self.sky_surface = pygame.transform.scale(pygame.image.load('graphics/Sky.png'), (self.width, self.height)).convert_alpha()
+				self.ground_surface = pygame.transform.scale(pygame.image.load('graphics/ground.png'), (self.width, self.height)).convert_alpha()
+				self.game_name_rect = self.game_name.get_rect(center = (self.width/2,self.height*0.3))
+				self.game_message_rect = self.game_message.get_rect(center = (self.width/2,self.height*0.7))
+				self.screen_trigger = True
+			elif fullscreen == False and self.screen_trigger == False:
+				self.width = width
+				self.height = height
+				self.screen = pygame.display.set_mode((self.width,self.height))
+				self.player_stand_rect = self.player_stand.get_rect(center = (self.width/2,self.height/2))
+				self.sky_surface = pygame.transform.scale(pygame.image.load('graphics/Sky.png'), (self.width, self.height)).convert_alpha()
+				self.ground_surface = pygame.transform.scale(pygame.image.load('graphics/ground.png'), (self.width, self.height)).convert_alpha()
+				self.game_name_rect = self.game_name.get_rect(center = (self.width/2,self.height*0.3))
+				self.game_message_rect = self.game_message.get_rect(center = (self.width/2,self.height*0.7))
+				self.screen_trigger = True
+			self.mouse_pos = pygame.mouse.get_pos()
+			self.display = pygame.Surface(((self.width, self.height)))
+
+			if self.game_active:
+				self.display.blit(self.sky_surface,(0,0))
+				self.display.blit(self.ground_surface,(0,600))
+				self.score = self.display_score()
+				
+				self.player.draw(self.display)
+				self.player.update()
+
+				self.obstacle_group.draw(self.display)
+				self.obstacle_group.update()
+
+				self.game_active = self.collision_sprite()
+				
+			else:
+				self.display.fill((94,129,162))
+				self.display.blit(self.player_stand,self.player_stand_rect)
+
+				score_message = self.test_font.render(f'Your earned: {self.score*5}',False,(111,196,169))
+				score_message_rect = score_message.get_rect(center = (self.width/2,self.height*0.7))
+				self.display.blit(self.game_name,self.game_name_rect)
+				if self.score == 0: 
+					self.display.blit(self.game_message,self.game_message_rect)
+				else:
+					self.trigger = True
+					self.display.blit(score_message,score_message_rect)
+				
+				if self.score * 5 >= 100:
+					self.score = 20
+     
+				#Return button
+				for button in [self.RETURNBUTTON]:
+					button.changeColor(self.mouse_pos)
+					button.update(self.display)
+					
+				if self.RETURNBUTTON.checkForInput(self.mouse_pos):
+					if pygame.mouse.get_pressed()[0] == 1:
+						self.button_pressed = True
+					elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
+						self.menu_out_fx.play()
+						add_mini_money(self.player_ID, self.score*5)
+						pygame.mixer.music.stop()
+						self.minigame_state = False
+						self.button_pressed = False
+						Game().run(self.width, self.height, fullscreen)
+
+			#Mouse cursor
+			pygame.mouse.set_visible(False)
+			if pygame.mouse.get_pressed()[0]:
+				self.display.blit(self.cursor_click, (self.mouse_pos[0] - 10, self.mouse_pos[1] - 10))
+			else:
+				self.display.blit(self.cursor_point, (self.mouse_pos[0] - 10, self.mouse_pos[1] - 10))
+            
+			self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0,0))        
+			pygame.display.update()
+			self.clock.tick(60)
+   
 class Game:
     def __init__(self):
         pygame.mixer.pre_init(44100, 16, 2, 4096)
@@ -560,6 +806,7 @@ class Game:
         self.cursor_point = pygame.image.load('data/cursor/cursor_point2.png').convert_alpha()
         self.cursor_click = pygame.image.load('data/cursor/cursor_click2.png').convert_alpha()
         pygame.display.set_caption('Gearheads&Gamblers')
+        self.fullscreen = False
 
         #Clock, font... 
         self.clock = pygame.time.Clock()
@@ -610,6 +857,10 @@ class Game:
             'cars' : load_images(f'data/graphics/car/{self.player_set}/{self.player_index}'),
             'board' : load_image('data/graphics/background/board.png'),
             'ranking' : load_image('data/graphics/background/ranking.png'),
+            'minigame1' : load_image('data/graphics/background/minigame1.png'),
+            'minigame2' : load_image('data/graphics/background/minigame2.png'),
+            'how_to_play' : load_image('data/graphics/background/how_to_play.png'),
+            'pond' : load_image('Temp\isometric-pond.png'),
         }
         
         self.player_names = {
@@ -665,6 +916,8 @@ class Game:
                 'Total money lost' : 'Total money lost on gambling:',
                 'How to play' : '<How to play>',
                 'You' : ' (You)',
+                'minigame1' : 'MINIGAME 1',
+                'minigame2' : 'MINIGAME 2',
             },
 
             'vn': {
@@ -711,6 +964,8 @@ class Game:
                 'Total money lost' : 'Tong so tien thua cuoc:',
                 'How to play' : '<Huong dan>',
                 'You' : ' (Ban)',
+                'minigame1' : 'MINIGAME 1',
+                'minigame2' : 'MINIGAME 2',
             }
         }
         
@@ -750,6 +1005,9 @@ class Game:
         self.rank = 0
         self.music_state = 1
         self.how_to_play_state = 0
+        self.screen_trigger = False
+        self.minigame1_state = 0
+        self.minigame2_state = 0
         
         #Player 
         # (Set, Type, Status) #
@@ -791,9 +1049,25 @@ class Game:
     def get_text(self, key):
         return self.language_resources[self.current_language].get(key, '')
     
-    def run(self):
+    def get_screen_state(self):
+        self.width_ = self.width
+        self.height_ = self.height
+        self.fullscreen_ = self.fullscreen
+        self.stats = [self.width_, self.height_, self.fullscreen_]
+        return self.stats
+        
+    def run(self, width = 1400, height = 700, fullscreen = False):
         while self.game_running:
             #Update variable
+            if self.screen_trigger == False:
+                self.width = width
+                self.height = height
+                if fullscreen:
+                    self.screen = pygame.display.set_mode((self.width,self.height), pygame.FULLSCREEN)
+                else:
+                    self.screen = pygame.display.set_mode((self.width,self.height))
+                self.screen_trigger = True
+                
             self.width = self.screen.get_width()
             self.height = self.screen.get_height()
             self.mouse_pos = pygame.mouse.get_pos()
@@ -818,11 +1092,16 @@ class Game:
                 elif self.credits_state == 1:
                     credits_menu(self)
                 elif self.minigame_state == 1:
-                    minigame1(self, self)
+                    minigame_menu(self, self)
                 elif self.history_state == 1:
                     history_menu(self, self)
                 elif self.how_to_play_state == 1:
                     how_to_play(self)
+                elif self.minigame1_state:
+                    minigame1(self, self)
+                elif self.minigame2_state:
+                    self.game_running = False
+                    MiniGame().minigame(self.width, self.height, self.fullscreen)
                                 
             #State 3
             elif self.game_state == 3:
