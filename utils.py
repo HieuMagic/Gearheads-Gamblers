@@ -1,3 +1,4 @@
+from docx import Document
 import pygame, os
 
 def load_image(path):
@@ -39,3 +40,20 @@ def count_images_in_folder(folder_path):
             if any(file_name.lower().endswith(ext) for ext in image_extensions):
                 image_count += 1
     return image_count
+
+def get_information( id_user):
+    docx_filename = "Accounts.docx"
+    doc = Document(docx_filename)
+    for table in doc.tables:
+        for row in table.rows:
+            if row.cells[0].text == id_user:
+                username = row.cells[1].text
+                password = row.cells[2].text
+                money = int(row.cells[3].text)
+                match = int(row.cells[4].text)
+                win = int(row.cells[5].text)
+                lose = int(row.cells[6].text)
+                win_money = int(row.cells[7].text)
+                lose_money = int(row.cells[8].text)
+                information = [id_user, username, password, money, match, win, lose, win_money, lose_money]
+                return information

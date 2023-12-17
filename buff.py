@@ -1,27 +1,20 @@
 import pygame 
 from random import randint, choice
+from utils import load_images
 
 class Buff(pygame.sprite.Sprite):
     def __init__(self, game):
         super().__init__()
         self.game = game
         self.stop_duration = 5000
+        self.click_fx = pygame.mixer.Sound('data/sounds/click.wav')
+        self.click_fx.set_volume(0.5)
+        self.index = 0
         
         #randomly choose a buff
-        self.type = choice(['speed_up', 'return', 'stop', 'teleport','win','sleep'])
-        if self.type == 'speed_up':
-            self.image = (pygame.image.load('data/magic/speed_up.png'))
-        elif self.type == 'return':
-            self.image = (pygame.image.load('data/magic/return.png'))
-        elif self.type == 'stop':
-            self.image = (pygame.image.load('data/magic/stop.png'))
-        elif self.type == 'win':
-            self.image = (pygame.image.load('data/magic/win.png'))
-        elif self.type == 'sleep':
-            self.image = (pygame.image.load('data/magic/sleep.png'))
-        elif self.type == 'teleport':
-            self.image = (pygame.image.load('data/magic/teleport.png'))
-            
+        self.buff_type = choice(['backward','return','forward', 'speed','win','stop'])
+        self.assets = load_images(f'data/magic/{self.buff_type}')
+        self.image = self.assets[self.index]
         #randomly choose a car and create a buff 200 pixel to the right of the car
         cars = [car for car in self.game.car_group.sprites()]
         self.chosen_car = choice(cars)
@@ -29,6 +22,10 @@ class Buff(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center = self.pos)
 
     def update(self):
+        self.index += 0.25
+        if self.index >= len(self.assets):
+            self.index = 1
+        self.image = self.assets[int(self.index)]
         if self.chosen_car != None:
             self.game.display.blit(self.image, self.rect)
             #check if the buff is picked up
@@ -40,23 +37,21 @@ class Buff(pygame.sprite.Sprite):
                 self.kill()
 
     def apply_buff(self):
-        if self.type == 'speed_up':
+        self.click_fx.play()
+        if self.buff_type == 'speed':
             self.chosen_car.speed += 10
-        elif self.type == 'return':
+        elif self.buff_type == 'return':
             self.chosen_car.rect.x = 100
-        elif self.type == 'stop':
-            if self.stop_duration:
-                self.chosen_car.speed = 0
-                self.stop_duration -= 100
-        elif self.type == 'win':
+        elif self.buff_type == 'stop':
+            self.chosen_car.stop = True
+        elif self.buff_type == 'win':
             self.chosen_car.rect.x = self.game.finish_line_x * 0.98
-        elif self.type == 'sleep':
-            if self.stop_duration:
-                self.chosen_car.speed = 0
-                self.stop_duration -= 100
+        elif self.buff_type == 'backward':
+            self.chosen_car.speed = 0
             self.chosen_car.rect.x -= 200
-        elif self.type == 'teleport':
+        elif self.buff_type == 'forward':
             self.chosen_car.rect.x += 200
+            
     
         
         

@@ -30,9 +30,9 @@ def TakePhotos(Id):
 
         # To stop duplicate images
         currentFrame += 1
-        time.sleep(0.05)
+        time.sleep(0.01)
         count += 1
-        if(count >= 10):
+        if(count >= 3):
             break
     # When everything done, release the capture
     cap.release()

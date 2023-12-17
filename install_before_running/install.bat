@@ -11,6 +11,7 @@ rem Install Python silently
 python-installer.exe /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
 
 pip install pygame
+pip install python-docx
 
 rem Clean up installer
 del python-installer.exe
