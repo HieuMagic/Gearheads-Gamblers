@@ -28,13 +28,17 @@ To run this project, you need to have Python and these module installed
 ![menu-preview](https://i.imgur.com/0sqB0v2.jpeg)
 
 ## Game instruction
-# Game menu
+
+### Game menu
+
 ![menu-preview](https://i.imgur.com/I33NzNa.png)
 
-# Betting screen
+### Betting screen
+
 ![menu-preview](https://i.imgur.com/DxIZPVQ.png)
 
-# Buffs
+### Buffs
+
 ![menu-preview](https://i.imgur.com/GtYnhQP.png)
 
 ## Contributing
