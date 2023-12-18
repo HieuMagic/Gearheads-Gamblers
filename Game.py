@@ -8,7 +8,6 @@ from buff import Buff
 from car import Car
 from menu import *
 
-
 class TextInput:
     def __init__(self, name, screen, font, position, color, width, height):
         self.text = name  
@@ -667,7 +666,7 @@ class MiniGame():
 		self.hovering_color = "#e2446c"
 		self.LightPixel_font = pygame.font.Font('data/font/LightPixel.ttf', 30)
 		self.button_image = pygame.image.load('data/small.png').convert_alpha()
-		self.RETURNBUTTON = Button(image = self.button_image, pos = (self.width * 0.15, self.height * 0.9), text_input = "<Return>",
+		self.RETURNBUTTON = Button(image = self.button_image, pos = (self.width * 0.15, self.height * 0.5), text_input = "<Return>",
 										font = self.LightPixel_font, base_color = self.base_color, hovering_color = self.hovering_color)
 		self.button_pressed = False
 		self.player_ID = Login_Game.get_ID()
@@ -736,7 +735,7 @@ class MiniGame():
 			self.mouse_pos = pygame.mouse.get_pos()
 			self.display = pygame.Surface(((self.width, self.height)))
 
-			if self.game_active:
+			if self.game_active and self.score <= 20:
 				self.display.blit(self.sky_surface,(0,0))
 				self.display.blit(self.ground_surface,(0,600))
 				self.score = self.display_score()

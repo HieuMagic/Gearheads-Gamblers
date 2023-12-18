@@ -59,7 +59,7 @@ def main_menu(self, game):
         elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
             if self.size_state == 0:
                 self.game.fullscreen = False
-                self.screen_size = [1200, 600]
+                self.screen_size = [1200, 700]
                 self.screen = pygame.display.set_mode((self.screen_size[0], self.screen_size[1]))
                 self.size_state = 1
             elif self.size_state == 1:
@@ -734,21 +734,18 @@ def ranking(self):
   
         elif car.rank == 3:
             player.player_index = car.player_index
-            player.index += 0.1
             player.update()
             player.image = self.assets['players'][int(player.index % len(self.assets['players']))]
             player.rect = player.image.get_rect(center = player.pos)
             player.pos = (self.width * 0.7, self.height * 0.4)
 
         elif car.rank == 4:
-            player.index += 0.1
             player.update()
             player.image = self.assets['players'][int(player.index % len(self.assets['players']))]
             player.rect = player.image.get_rect(center = player.pos)
             player.pos = (self.width * 0.13, self.height * 0.65)
            
         elif car.rank == 5:
-            player.index += 0.1
             player.update()
             player.image = self.assets['players'][int(player.index % len(self.assets['players']))]
             player.rect = player.image.get_rect(center = player.pos)
