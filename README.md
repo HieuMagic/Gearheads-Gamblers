@@ -5,7 +5,7 @@
 ## Table of Contents
 
 - [Installation](#installation)
-- [Screenshot](#screenshot)
+- [Instruction](#game-instruction)
 - [Contributing](#contributing)
 - [Credits](#credits)
 - [License](#license)
@@ -23,18 +23,18 @@ To run this project, you need to have Python and these module installed
 
 -If you don't have these installed, run the .bat file in the install_before_running folder
 
-## Screenshot
-
-![menu-preview](https://i.imgur.com/0sqB0v2.jpeg)
-
 ## Game instruction
-# Game menu
+
+### Game menu
+
 ![menu-preview](https://i.imgur.com/I33NzNa.png)
 
-# Betting screen
+### Betting screen
+
 ![menu-preview](https://i.imgur.com/DxIZPVQ.png)
 
-# Buffs
+### Buffs
+
 ![menu-preview](https://i.imgur.com/GtYnhQP.png)
 
 ## Contributing
