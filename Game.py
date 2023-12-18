@@ -864,7 +864,7 @@ class Game:
         
         self.player_names = {
             '1' : ['Dai Hiep', 'Dinh Hieu', 'Quang Duy', 'Manh Hien', 'Trong Hieu'],
-            '2' : ['Chicken','Cow','Frog','Supeerduck', 'Worm'],
+            '2' : ['Chicken','Cow','Frog','Superduck', 'Worm'],
             '3' : ['Hoodiewoodie','Knight','Samurai','Satyr', 'Wizard'],
             '4' : ['Burger','Coin', 'Fire','Slime', 'Thunder'],
             '5' : ['Death','Eyes','Magician','Warrior', 'Witch'],

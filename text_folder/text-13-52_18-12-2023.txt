@@ -1,8 +1,0 @@
-Top1: Supeerduck
-Top2: Cow (Ban)
-Top3: Chicken
-Top4: Worm
-Top5: Frog
-Your rank: 2
-Your money: 378
-Money earned: 162

@@ -1,8 +1,0 @@
-Top1: Fire
-Top2: Slime
-Top3: Burger (You)
-Top4: Coin
-Top5: Thunder
-Your rank: 3
-Your money: 428
-Money lost: 72

@@ -1,0 +1,8 @@
+Top1: Satyr
+Top2: Hoodiewoodie (You)
+Top3: Knight
+Top4: Samurai
+Top5: Wizard
+Your rank: 2
+Your money: 710
+Money earned: 210
