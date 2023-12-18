@@ -606,7 +606,9 @@ class Obstacle(pygame.sprite.Sprite):
 		else:
 			snail_1 = pygame.image.load('graphics/snail/snail1.png').convert_alpha()
 			snail_2 = pygame.image.load('graphics/snail/snail2.png').convert_alpha()
-			self.frames = [snail_1,snail_2]
+			snail_3 = pygame.image.load('graphics/snail/snail3.png').convert_alpha()
+			snail_4 = pygame.image.load('graphics/snail/snail4.png').convert_alpha()
+			self.frames = [snail_1,snail_2,snail_3,snail_4]
 			y_pos  = 600
 
 		self.animation_index = 0
@@ -735,7 +737,7 @@ class MiniGame():
 			self.mouse_pos = pygame.mouse.get_pos()
 			self.display = pygame.Surface(((self.width, self.height)))
 
-			if self.game_active and self.score <= 20:
+			if self.game_active:
 				self.display.blit(self.sky_surface,(0,0))
 				self.display.blit(self.ground_surface,(0,600))
 				self.score = self.display_score()
@@ -747,6 +749,8 @@ class MiniGame():
 				self.obstacle_group.update()
 
 				self.game_active = self.collision_sprite()
+				if self.score >= 20:
+					self.game_active = False
 				
 			else:
 				self.display.fill((94,129,162))
