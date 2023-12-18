@@ -1,8 +1,0 @@
-Top1: Quang Duy
-Top2: Dinh Hieu
-Top3: Manh Hien
-Top4: Dai Hiep (You)
-Top5: Trong Hieu
-Your rank: 4
-Your money: 84
-Money lost: 56

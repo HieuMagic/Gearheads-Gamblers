@@ -1,5 +1,5 @@
 from utils import get_text_size, get_image_size, update_assets
-from button import Button, AnimatedButton, CustomButton
+from button import Button, CustomButton
 from datetime import datetime
 from docx import Document
 from car import Car
@@ -75,12 +75,15 @@ def main_menu(self, game):
             self.click_fx.play()
             self.button_pressed = False
         
-    #Check if credits button is pressed
+    #Check if credits button is pressed    
     if self.CREDITS.checkForInput(self.mouse_pos):
-        if pygame.mouse.get_pressed()[0] == 1 and self.credits_state == 0:
+        if pygame.mouse.get_pressed()[0] == 1:
+            self.button_pressed = True
+        elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
             self.click_fx.play()
             self.main_menu_state = 0
             self.credits_state = 1
+            self.button_pressed = False
 
     #Check if minigame button is pressed
     if self.money < 100:
@@ -117,15 +120,17 @@ def main_menu(self, game):
                 if self.button_pressed == True:
                     self.confirm2_fx.play()
                     self.game_state = 3
-                    self.button_pressed = False
-        
-    #Check if quit button is pressed
-    if self.QUIT.checkForInput(self.mouse_pos):
-        if pygame.mouse.get_pressed()[0] == 1:
-            self.menu_out_fx.play()
-            pygame.quit()
-            exit()
+                    self.button_pressed = False       
     
+    if self.QUIT.checkForInput(self.mouse_pos):
+            if pygame.mouse.get_pressed()[0] == 1:
+                self.button_pressed = True
+            elif pygame.mouse.get_pressed()[0] == 0:
+                if self.button_pressed == True:
+                    self.menu_out_fx.play()
+                    pygame.quit()
+                    exit()
+
     #Change language
     if self.LANGUAGE.checkForInput(self.mouse_pos):
         if pygame.mouse.get_pressed()[0] == 1:
@@ -690,7 +695,7 @@ def ranking(self):
     #Text
     self.top1_text = self.LightPixel_font.render(f"Top 1", False, "#e65d83")
     self.top2_text = self.LightPixel_font.render(f"Top 2", False, "#63af57")
-    self.top3_text = self.LightPixel_font.render(f"Top 3", False, "#3a90d0")
+    self.top3_text = self.LightPixel_font.render(f"Top 3", False, self.base_color)
     self.top4_text = self.LightPixel_font.render(f"Top 4", False, self.base_color)
     self.top5_text = self.LightPixel_font.render(f"Top 5", False, self.base_color)
     
@@ -729,7 +734,6 @@ def ranking(self):
   
         elif car.rank == 3:
             player.player_index = car.player_index
-            player.player_status = 2
             player.index += 0.1
             player.update()
             player.image = self.assets['players'][int(player.index % len(self.assets['players']))]
@@ -899,7 +903,6 @@ def leaderboard(self, game):
             self.rank = 0
             self.button_pressed = False
             self.bet = self.money
-
 
 #Button    
 def button_load(self):

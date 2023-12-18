@@ -1,0 +1,8 @@
+Top1: Hoodiewoodie
+Top2: Wizard
+Top3: Knight (You)
+Top4: Samurai
+Top5: Satyr
+Your rank: 3
+Your money: 335
+Money lost: 43

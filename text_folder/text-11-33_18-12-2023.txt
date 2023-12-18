@@ -1,8 +1,0 @@
-Top1: Cow
-Top2: Worm
-Top3: Frog
-Top4: Chicken (You)
-Top5: Supeerduck
-Your rank: 4
-Your money: 8559
-Money lost: 8559

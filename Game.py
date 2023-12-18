@@ -545,6 +545,7 @@ class Login_Game:
 
 Login_Game = Login_Game()
 Login_Game.Run()
+
 def add_mini_money(id_user, moremoney):
 	docx_filename = "Accounts.docx"
 	doc = Document(docx_filename)
@@ -1035,11 +1036,11 @@ class Game:
         pygame.time.set_timer(self.buff_timer, 1000)
         self.start_time = 0
     
-    def scrshoot(self): #Thêm vào hàm Game trong Game.py
+    def scrshoot(self):
         self.current_datetime = datetime.now()
         self.date_time_str = self.current_datetime.strftime("%H-%M_%d-%m-%Y")
         self.scrshoot_file_path = f"screenshot_folder/img-{self.date_time_str}.jpg"
-        self.capture_region = (self.width*0.15, self.height*0.15, self.width*0.7, self.height*0.7)
+        self.capture_region = (0, 0, self.width, self.height)
         self.captured_surface = self.screen.subsurface(pygame.Rect(self.capture_region))
         pygame.image.save(self.captured_surface, self.scrshoot_file_path)
      

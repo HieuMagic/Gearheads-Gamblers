@@ -26,10 +26,3 @@ def Aready():
         clock.tick(speed)
         aready -= 1
     pygame.quit()
-
-
-# theplayer = [['Adventure','Death','Eyes','Magician','Warrior', 'Witch'],
-#              ['My Group', 'Dai Hiep', 'Dinh Hieu', 'Quang Duy', 'Manh Hien', 'Trong Hieu'],
-#              ['Animal','Chicken','Cow','Frog','Supeerduck', 'Worm'],
-#              ['Magic World','Hoodiewoodie','Knight','Samurai','Satyr', 'Wizard'],
-#              ['Unnatural','Burger','Coin', 'Fire','Slime', 'Thunder']]
