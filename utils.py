@@ -20,6 +20,7 @@ def get_image_size(self, image):
     return self.image_width, self.image_height
 
 def update_assets(self, assets):
+    print(self.player_set, self.player_index)
     assets['cars'] = load_images(f'data/graphics/car/{self.player_set}/{self.player_index}')
     assets['players'] = load_images(f'data/player/{self.player_set}/{self.player_index}/{self.player_status}/')
     assets['map'] : load_image(f'data/map/{self.map_index}/{self.map_size}.png')

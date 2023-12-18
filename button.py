@@ -76,10 +76,10 @@ class CustomButton:
 	def button_logic(self):
 		self.click_fx.play()
 		if self.type == 'bet_plus':
-			if self.game.bet + 20 <= self.game.money:
+			if self.game.bet + 20 <= self.game.money and self.game.money >= 100:
 				self.game.bet += 20
 		elif self.type == 'bet_minus':
-			if self.game.bet > 100 and self.game.bet - 20 >= 100:
+			if self.game.money >= 100 and self.game.bet - 20 >= 100:
 				self.game.bet -= 20
 		elif self.type == 'bet_all':
 			if self.game.money >= 100:

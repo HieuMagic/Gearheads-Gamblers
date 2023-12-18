@@ -16,9 +16,9 @@ class Player(pygame.sprite.Sprite):
         
     def update(self):
         update_assets(self, self.game.assets)
-        if self.player_set == 5:
-            self.player_set = 0
-        self.player_name = self.game.player_names[f'{self.player_set + 1}'][self.player_index - 1]
+        if self.player_set == 6:
+            self.player_set = 1
+        self.player_name = self.game.player_names[f'{self.player_set}'][self.player_index - 1]
         self.index += 0.1
         self.rect = self.image.get_rect(center = self.pos)
         self.game.display.blit(self.image, self.rect)

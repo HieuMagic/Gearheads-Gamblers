@@ -5,7 +5,6 @@ from docx import Document
 from car import Car
 import pygame
 
-
 # Menu
 def main_menu(self, game):
     #Background
@@ -458,14 +457,18 @@ def choose_player_set_menu(self):
         self.button_pressed = True
     elif self.NEXT_BUTTON.checkForInput(self.mouse_pos) and pygame.mouse.get_pressed()[0] == 0 and self.button_pressed:
         self.click_fx.play()
-        self.player_set = (self.player_set % 5) + 1
+        self.player_set += 1
+        if self.player_set == 6:
+            self.player_set = 1
         self.button_pressed = False
 
     if self.PREV_BUTTON.checkForInput(self.mouse_pos) and pygame.mouse.get_pressed()[0] == 1:
         self.button_pressed = True
     elif self.PREV_BUTTON.checkForInput(self.mouse_pos) and pygame.mouse.get_pressed()[0] == 0 and self.button_pressed:
         self.click_fx.play()
-        self.player_set = (self.player_set - 2) % 5 + 1
+        self.player_set -= 1
+        if self.player_set == 0:
+            self.player_set = 5
         self.button_pressed = False
     
     if self.CONFIRM_BUTTON.checkForInput(self.mouse_pos) and pygame.mouse.get_pressed()[0] == 1:
@@ -599,6 +602,7 @@ def choose_player_menu(self):
         self.player_name_text = self.LightPixel_font.render(f"{player.player_name}", False, "#f6695a")
         self.player_name_text_rect = self.player_name_text.get_rect(center = (self.width / 2, self.height * 0.3))
         self.display.blit(self.player_name_text, self.player_name_text_rect)
+    
 #Main game
 def game_play(self):
     Car.update_pos(self, self.game)
@@ -608,7 +612,7 @@ def game_play(self):
     
     #Display the cars
     for car, player in zip(self.car_group.sprites(), self.player_group.sprites()):
-        car.player_set = player.player_set
+        car.player_set = self.player_set
         car.player_index = player.player_index
         car.update()
     
@@ -690,9 +694,9 @@ def ranking(self):
     self.display.blit(self.top3_text, self.top3_rect)
     self.display.blit(self.top4_text, self.top4_rect)
     self.display.blit(self.top5_text, self.top5_rect)
-    
     # Show the image of the all players and cars matching the rank
     for car, player in zip(self.car_group.sprites(), self.player_group.sprites()):
+        self.player_set = car.player_set
         if car.rank == 1:
             player.player_index = car.player_index
             player.player_status = 2
@@ -722,7 +726,6 @@ def ranking(self):
             player.pos = (self.width * 0.7, self.height * 0.4)
 
         elif car.rank == 4:
-            self.rank4 = car.player_index
             player.index += 0.1
             player.update()
             player.image = self.assets['players'][int(player.index % len(self.assets['players']))]
@@ -730,7 +733,6 @@ def ranking(self):
             player.pos = (self.width * 0.13, self.height * 0.65)
            
         elif car.rank == 5:
-            self.rank5 = car.player_index
             player.index += 0.1
             player.update()
             player.image = self.assets['players'][int(player.index % len(self.assets['players']))]
@@ -823,22 +825,27 @@ def leaderboard(self, game):
             self.money_diff = int(self.bet)
             add_money(self.game.ID, self.money_diff)
             self.money_diff_surf = self.LightPixel_font.render(f"{self.get_text('You earned')}: {self.money_diff}", False, self.base_color)
+            self.lines = [f"Top1: {self.top1}", '\n',f"Top2: {self.top2}", '\n',f"Top3: {self.top3}", '\n',f"Top4: {self.top4}", '\n',f"Top5: {self.top5}", '\n',f"Your rank: {self.result}", '\n',f"Your money: {self.money}", '\n',f"Money earned: {self.money_diff}"]
         elif self.result == 2:
             self.money_diff = int(self.bet * 0.75)
             add_money(self.game.ID, self.money_diff)
             self.money_diff_surf = self.LightPixel_font.render(f"{self.get_text('You earned')}: {self.money_diff}", False, self.base_color)
+            self.lines = [f"Top1: {self.top1}", '\n',f"Top2: {self.top2}", '\n',f"Top3: {self.top3}", '\n',f"Top4: {self.top4}", '\n',f"Top5: {self.top5}", '\n',f"Your rank: {self.result}", '\n',f"Your money: {self.money}", '\n',f"Money earned: {self.money_diff}"]
         elif self.result == 3:
             self.money_diff = int(self.bet * 0.33)
             minus_money(self.game.ID, self.money_diff)
             self.money_diff_surf = self.LightPixel_font.render(f"{self.get_text('You lost')}: {self.money_diff}", False, self.base_color)
+            self.lines = [f"Top1: {self.top1}", '\n',f"Top2: {self.top2}", '\n',f"Top3: {self.top3}", '\n',f"Top4: {self.top4}", '\n',f"Top5: {self.top5}", '\n',f"Your rank: {self.result}", '\n',f"Your money: {self.money}", '\n',f"Money lost: {self.money_diff}"]
         elif self.result == 4:
             self.money_diff = int(self.bet * 0.5)
             minus_money(self.game.ID, self.money_diff)
             self.money_diff_surf = self.LightPixel_font.render(f"{self.get_text('You lost')}: {self.money_diff}", False, self.base_color)
+            self.lines = [f"Top1: {self.top1}", '\n',f"Top2: {self.top2}", '\n',f"Top3: {self.top3}", '\n',f"Top4: {self.top4}", '\n',f"Top5: {self.top5}", '\n',f"Your rank: {self.result}", '\n',f"Your money: {self.money}", '\n',f"Money lost: {self.money_diff}"]
         elif self.result == 5:
             self.money_diff = int(self.bet)
             minus_money(self.game.ID, self.money_diff)
             self.money_diff_surf = self.LightPixel_font.render(f"{self.get_text('You lost')}: {self.money_diff}", False, self.base_color)
+            self.lines = [f"Top1: {self.top1}", '\n',f"Top2: {self.top2}", '\n',f"Top3: {self.top3}", '\n',f"Top4: {self.top4}", '\n',f"Top5: {self.top5}", '\n',f"Your rank: {self.result}", '\n',f"Your money: {self.money}", '\n',f"Money lost: {self.money_diff}"]
         self.trigger = True
         
     self.money_surf = self.LightPixel_font.render(f"{self.get_text('Total money')}: {self.money}", False, self.base_color)
@@ -863,7 +870,6 @@ def leaderboard(self, game):
             self.button_pressed = True
         elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
             self.click_fx.play()
-            self.lines = [f"Top1: {self.top1}", '\n',f"Top2: {self.top2}", '\n',f"Top3: {self.top3}", '\n',f"Top4: {self.top4}", '\n',f"Top5: {self.top5}", '\n',f"Your rank: {self.result}", '\n',f"Your money: {self.money}", '\n',f"Money earn/lost: {self.money_diff}"]
             write_to_txt(self.lines)
             for car in self.car_group.sprites():
                 car.reset()

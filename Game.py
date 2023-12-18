@@ -567,7 +567,7 @@ class MiniPlayer(pygame.sprite.Sprite):
 		self.gravity = 0
 
 		self.jump_sound = pygame.mixer.Sound('audio/jump.mp3')
-		self.jump_sound.set_volume(0.5)
+		self.jump_sound.set_volume(0.3)
 
 	def player_input(self):
 		keys = pygame.key.get_pressed()
@@ -656,8 +656,8 @@ class MiniGame():
 		self.cursor_point = pygame.image.load('data/cursor/cursor_point2.png').convert_alpha()
 		self.cursor_click = pygame.image.load('data/cursor/cursor_click2.png').convert_alpha()
 		pygame.mixer.music.load('audio/music.wav')
-		pygame.mixer.music.play(-1)
-		pygame.mixer.music.set_volume(0.2)
+		pygame.mixer.music.play(-1, 0, 3000)
+		pygame.mixer.music.set_volume(0.1)
 		self.menu_out_fx = pygame.mixer.Sound('data/sounds/menu_out.wav')
 		self.menu_out_fx.set_volume(0.2)
 		self.mouse_pos = pygame.mouse.get_pos()
@@ -862,11 +862,11 @@ class Game:
         }
         
         self.player_names = {
-            '1' : ['Death','Eyes','Magician','Warrior', 'Witch'],
-            '2' : ['Dai Hiep', 'Dinh Hieu', 'Quang Duy', 'Manh Hien', 'Trong Hieu'],
-            '3' : ['Chicken','Cow','Frog','Supeerduck', 'Worm'],
-            '4' : ['Hoodiewoodie','Knight','Samurai','Satyr', 'Wizard'],
-            '5' : ['Burger','Coin', 'Fire','Slime', 'Thunder']
+            '1' : ['Dai Hiep', 'Dinh Hieu', 'Quang Duy', 'Manh Hien', 'Trong Hieu'],
+            '2' : ['Chicken','Cow','Frog','Supeerduck', 'Worm'],
+            '3' : ['Hoodiewoodie','Knight','Samurai','Satyr', 'Wizard'],
+            '4' : ['Burger','Coin', 'Fire','Slime', 'Thunder'],
+            '5' : ['Death','Eyes','Magician','Warrior', 'Witch'],
         }
         
         self.language_resources = {
@@ -1006,7 +1006,8 @@ class Game:
         self.screen_trigger = False
         self.minigame1_state = 0
         self.minigame2_state = 0
-        self.how_index = 1
+        self.how_index = 0
+        
         #Player 
         # (Set, Type, Status) #
         self.player_group = pygame.sprite.Group()
