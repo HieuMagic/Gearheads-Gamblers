@@ -52,16 +52,6 @@ def main_menu(self, game):
     self.display.blit(pygame.transform.rotozoom(self.map_surface, 0, 1), self.map_rect)  
     
     #---#
-    #Check if start button is pressed
-    if self.START.checkForInput(self.mouse_pos):
-        if pygame.mouse.get_pressed()[0] == 1:
-            self.button_pressed = True
-        elif pygame.mouse.get_pressed()[0] == 0:
-            if self.button_pressed == True:
-                self.confirm2_fx.play()
-                self.game_state = 3
-                self.button_pressed = False
-
     #Change screen size
     if self.SIZE.checkForInput(self.mouse_pos):
         if pygame.mouse.get_pressed()[0] == 1:
@@ -94,6 +84,11 @@ def main_menu(self, game):
 
     #Check if minigame button is pressed
     if self.money < 100:
+        #Display "Not enough money" text
+        self.not_enough_money_text = self.LightPixel_font.render(self.get_text('Not enough money'), False, self.base_color)
+        self.not_enough_money_text_rect = self.not_enough_money_text.get_rect(center = (self.width / 2, self.height * 0.85))
+        self.display.blit(self.not_enough_money_text, self.not_enough_money_text_rect)
+        
         self.MINIGAME = Button(image = self.button_image, pos = ((self.width * 0.05 + get_text_size(self, self.get_text('Minigame'))[0] / 2),(self.height * 0.7)), text_input = self.get_text('Minigame'),
                             font = self.LightPixel_font, base_color = self.base_color, hovering_color = self.hovering_color)
         for button in [self.MINIGAME]:
@@ -108,8 +103,22 @@ def main_menu(self, game):
                 self.main_menu_state = 0
                 self.minigame_state = 1
                 self.button_pressed = False
+    else:
+        self.START = Button(image = self.long_button_image ,pos = (self.width / 2, self.height * 0.85),text_input = self.get_text('Select map'), 
+                        font = self.LightPixel_font, base_color = self.base_color, hovering_color = self.hovering_color)
+        for button in [self.START]:
+            button.changeColor(self.mouse_pos)
+            button.update(self.display)
+        #Check if start button is pressed
+        if self.START.checkForInput(self.mouse_pos):
+            if pygame.mouse.get_pressed()[0] == 1:
+                self.button_pressed = True
+            elif pygame.mouse.get_pressed()[0] == 0:
+                if self.button_pressed == True:
+                    self.confirm2_fx.play()
+                    self.game_state = 3
+                    self.button_pressed = False
         
-            
     #Check if quit button is pressed
     if self.QUIT.checkForInput(self.mouse_pos):
         if pygame.mouse.get_pressed()[0] == 1:
@@ -396,10 +405,11 @@ def minigame1(self, game):
         self.money_text = "+1"
     else:
         self.money_text = "+0"
-    self.button1 = AnimatedButton(self,self.money_text,200,200,(self.width / 2 - 100, self.height / 2 - 100),5)
+    self.button1 = CustomButton(self, self.money_text, pygame.transform.scale2x(pygame.image.load('data/button/add_money_1.png')).convert_alpha(), pygame.transform.scale2x(pygame.image.load('data/button/add_money_0.png')).convert_alpha(),
+                                (self.width * 0.5, self.height * 0.5), '+1')
     
     #Update
-    self.button1.draw()
+    self.button1.update()
     self.display.blit(self.limit_text, self.limit_text_rect)
     
     #Button
@@ -419,8 +429,9 @@ def minigame1(self, game):
             self.button_pressed = True
         elif pygame.mouse.get_pressed()[0] == 0 and self.button_pressed == True:
             self.menu_out_fx.play()
-            self.minigame_state = 0
+            self.minigame1_state = 0
             self.main_menu_state = 1
+            self.bet = self.money
             self.button_pressed = False
 
 def choose_player_set_menu(self):
@@ -887,17 +898,12 @@ def leaderboard(self, game):
             self.game_state = 8
             self.rank = 0
             self.button_pressed = False
-            if self.money < 100:
-                self.bet = 0
-            else:
-                self.bet = self.money
+            self.bet = self.money
 
 
 #Button    
 def button_load(self):
     button_animation(self) 
-    self.START = Button(image = self.long_button_image ,pos = (self.width / 2, self.height * 0.85),text_input = self.get_text('Select map'), 
-                        font = self.LightPixel_font, base_color = self.base_color, hovering_color = self.hovering_color)
     self.LANGUAGE = Button(image = self.button_image, pos = ((self.width * 0.95 - get_text_size(self, self.get_text('Language'))[0] / 2), (self.height * 0.3)),text_input = self.get_text('Language'), 
                            font = self.LightPixel_font, base_color = self.base_color, hovering_color = self.hovering_color)
     self.HISTORY = Button(image = self.button_image, pos = ((self.width * 0.95 - get_text_size(self, self.get_text('History'))[0] / 2),(self.height * 0.4)),text_input = self.get_text('History'), 
@@ -917,7 +923,7 @@ def button_load(self):
     self.MAP_SIZE = Button(image = self.button_image, pos = (self.width / 2, self.height * 0.7), text_input = f"{self.get_text('Map size')}: {self.map_size}",
                            font = self.LightPixel_font, base_color = self.base_color, hovering_color = self.base_color)
     #Button update
-    for button in [self.START, self.LANGUAGE, self.HISTORY, self.MUSIC, self.SIZE,
+    for button in [self.LANGUAGE, self.HISTORY, self.MUSIC, self.SIZE,
                    self.CREDITS, self.QUIT, self.MAP_SIZE]:
         button.changeColor(self.mouse_pos)
         button.update(self.display)

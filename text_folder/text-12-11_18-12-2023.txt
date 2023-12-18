@@ -1,0 +1,8 @@
+Top1: Thunder
+Top2: Burger (You)
+Top3: Slime
+Top4: Fire
+Top5: Coin
+Your rank: 2
+Your money: 460
+Money earned: 197

@@ -1,0 +1,8 @@
+Top1: Death (You)
+Top2: Magician
+Top3: Eyes
+Top4: Witch
+Top5: Warrior
+Your rank: 1
+Your money: 0
+Money earned: 0

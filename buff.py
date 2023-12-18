@@ -12,7 +12,7 @@ class Buff(pygame.sprite.Sprite):
         self.index = 0
         
         #randomly choose a buff
-        self.buff_type = choice(['backward','return','forward', 'speed','win','stop'])
+        self.buff_type = choice(['backward','backward','return','forward','forward', 'speed', 'speed', 'win', 'win','stop'])
         self.assets = load_images(f'data/magic/{self.buff_type}')
         self.image = self.assets[self.index]
         #randomly choose a car and create a buff 200 pixel to the right of the car
@@ -39,7 +39,10 @@ class Buff(pygame.sprite.Sprite):
     def apply_buff(self):
         self.click_fx.play()
         if self.buff_type == 'speed':
-            self.chosen_car.speed += 10
+            if self.chosen_car.speed < 0:
+                self.chosen_car.speed -= 5
+            else:
+                self.chosen_car.speed += 5
         elif self.buff_type == 'return':
             self.chosen_car.rect.x = 100
         elif self.buff_type == 'stop':

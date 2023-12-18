@@ -567,7 +567,7 @@ class MiniPlayer(pygame.sprite.Sprite):
 		self.gravity = 0
 
 		self.jump_sound = pygame.mixer.Sound('audio/jump.mp3')
-		self.jump_sound.set_volume(0.3)
+		self.jump_sound.set_volume(0.1)
 
 	def player_input(self):
 		keys = pygame.key.get_pressed()
@@ -820,10 +820,7 @@ class Game:
         self.ID = Login_Game.get_ID()
         self.player_name = get_information(self.ID)[1]
         self.money = get_information(self.ID)[3]
-        if self.money < 100:
-            self.bet = 0
-        else:
-            self.bet = get_information(self.ID)[3]
+        self.bet = get_information(self.ID)[3]
         self.total_game = get_information(self.ID)[4]
         self.win_game = get_information(self.ID)[5]
         self.lose_game = get_information(self.ID)[6]
@@ -916,6 +913,7 @@ class Game:
                 'You' : ' (You)',
                 'minigame1' : 'MINIGAME 1',
                 'minigame2' : 'MINIGAME 2',
+                'Not enough money' : 'Not enough money to bet',
             },
 
             'vn': {
@@ -964,6 +962,7 @@ class Game:
                 'You' : ' (Ban)',
                 'minigame1' : 'MINIGAME 1',
                 'minigame2' : 'MINIGAME 2',
+                'Not enough money' : 'Khong du tien de cuoc',
             }
         }
         
@@ -1040,7 +1039,7 @@ class Game:
         self.current_datetime = datetime.now()
         self.date_time_str = self.current_datetime.strftime("%H-%M_%d-%m-%Y")
         self.scrshoot_file_path = f"screenshot_folder/img-{self.date_time_str}.jpg"
-        self.capture_region = (self.width*0.05, self.height*0.05, self.width*0.9, self.height*0.9)
+        self.capture_region = (self.width*0.15, self.height*0.15, self.width*0.7, self.height*0.7)
         self.captured_surface = self.screen.subsurface(pygame.Rect(self.capture_region))
         pygame.image.save(self.captured_surface, self.scrshoot_file_path)
      
@@ -1106,6 +1105,7 @@ class Game:
                     how_to_play(self)
                 elif self.minigame1_state:
                     minigame1(self, self)
+                    self.money = get_information(self.ID)[3]
                 elif self.minigame2_state:
                     self.game_running = False
                     MiniGame().minigame(self.width, self.height, self.fullscreen)

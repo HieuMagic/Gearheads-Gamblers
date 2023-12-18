@@ -10,7 +10,7 @@ class Car(pygame.sprite.Sprite):
         self.player_status = status
         self.player_set = set
         self.acceleration = 0.2
-        self.max_speed = 12
+        self.max_speed = 8
         self.speed = 2
         self.pos = pos
         self.x_pos = self.pos[0]

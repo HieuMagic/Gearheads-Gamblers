@@ -1,3 +1,4 @@
+from docx import Document
 import pygame
 
 class Button:
@@ -119,6 +120,19 @@ class CustomButton:
 			self.game.how_index += 1
 			if self.game.how_index == 3:
 				self.game.how_index = 0
+		elif self.type == '+1':
+			if self.game.money < 100:
+				add_mini_money(self.game.ID, 1)
+
+def add_mini_money(id_user, moremoney):
+	docx_filename = "Accounts.docx"
+	doc = Document(docx_filename)
+	for table in doc.tables:
+		for row in table.rows:
+			if row.cells[0].text == id_user:
+				row.cells[3].text = str(moremoney + int(row.cells[3].text))
+				doc.save(docx_filename)
+    
 class AnimatedButton:
 	pressed = False
 	def __init__(self,game,text,width,height,pos,elevation):
